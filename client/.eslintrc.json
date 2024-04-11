@@ -1,0 +1,84 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+  "overrides": [],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "project": ["./tsconfig.json"]
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "@stylistic",
+    "@stylistic/jsx",
+    "@stylistic/ts",
+    "@stylistic/js"
+  ],
+  "root": true,
+  "ignorePatterns": "dist/**",
+  "rules": {
+    "@stylistic/comma-dangle": ["error", "never"],
+    "@stylistic/dot-location": ["error", "property"],
+    "@stylistic/jsx/jsx-closing-bracket-location": ["error", "line-aligned"],
+    "@stylistic/keyword-spacing": "error",
+    "@stylistic/no-multiple-empty-lines": [
+      "error",
+      {
+        "max": 1
+      }
+    ],
+    "@stylistic/no-whitespace-before-property": "error",
+    "@stylistic/object-curly-spacing": ["error", "always"],
+    "@stylistic/object-property-newline": [
+      "error",
+      {
+        "allowAllPropertiesOnSameLine": true
+      }
+    ],
+    "@stylistic/semi": ["error", "always"],
+    "@stylistic/space-in-parens": ["error", "never"],
+    "@stylistic/ts/member-delimiter-style": [
+      "error",
+      {
+        "multiline": {
+          "delimiter": "semi",
+          "requireLast": true
+        },
+        "singleline": {
+          "delimiter": "semi",
+          "requireLast": true
+        }
+      }
+    ],
+    "@stylistic/js/no-multi-spaces": "error",
+    "@typescript-eslint/no-namespace": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@stylistic/jsx-props-no-multi-spaces": "error",
+    "@stylistic/jsx-quotes": ["error", "prefer-single"],
+    "@stylistic/jsx/jsx-self-closing-comp": [
+      "error",
+      {
+        "component": true,
+        "html": true
+      }
+    ],
+    "@stylistic/jsx-tag-spacing": [
+      "error",
+      {
+        "closingSlash": "never",
+        "beforeSelfClosing": "proportional-always",
+        "afterOpening": "never",
+        "beforeClosing": "never"
+      }
+    ],
+    "curly": ["warn", "multi"],
+    "indent": ["error", 2],
+    "linebreak-style": ["error", "unix"],
+    "quotes": ["error", "single"],
+    "space-infix-ops": ["error"]
+  }
+}

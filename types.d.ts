@@ -1,0 +1,3 @@
+type TestRoute = {
+  data: boolean
+};
