@@ -4,6 +4,7 @@ import type { PlannedCourse } from '../src/models/planModel';
 import type { TermSeason } from './enum';
 import type { AccomplishmentId, CourseId, PlanId, UserId } from './id';
 
+export type SentAccomplishmentData = Omit<Accomplishment, 'yearsOffered' | 'type' | 'requirements'>;
 export type DataResponse = {
   loggedInId: UserId;
   loggedInName: string;
@@ -14,6 +15,7 @@ export type DataResponse = {
   availableCatalogs: number[];
   plan?: {
     planId: PlanId;
+    planName: string;
     majors: string[]; // Accomplishment names, for convenience
     minors: string[];
     catalogYear: number;
@@ -25,6 +27,7 @@ export type DataResponse = {
   plans: {
     [key: PlanId]: {
       planId: PlanId;
+      planName: string;
       majors: {
         [key: AccomplishmentId]: string;
       };
@@ -37,14 +40,14 @@ export type DataResponse = {
   catalog?: {
     catalogYear: number;
     courses: {
-      [key: CourseId]: Course;
+      [key: CourseId]: Omit<Course, 'isGenEd' | 'yearsOffered'>;
     };
     accomplishments: {
       majors: {
-        [key: AccomplishmentId]: Accomplishment;
+        [key: AccomplishmentId]: SentAccomplishmentData;
       };
       minors: {
-        [key: AccomplishmentId]: Accomplishment;
+        [key: AccomplishmentId]: SentAccomplishmentData;
       };
     };
   };
@@ -52,6 +55,6 @@ export type DataResponse = {
     core: CourseId[];
     electives: CourseId[];
     cognates: CourseId[];
-    geneds: CourseId[];
+    genEds: CourseId[];
   };
 };
