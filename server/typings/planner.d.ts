@@ -20,6 +20,8 @@ export type DataResponse = {
     minors: string[];
     catalogYear: number;
     yearCount: number;
+    studentNotes: string;
+    advisorNotes?: string;
     courses: {
       [key: CourseId]: PlannedCourse;
     };

@@ -129,6 +129,8 @@ route.get('/data', header('authorization').isJWT(), query('studentId').optional(
       data.plan = {
         planId: plan.planId,
         planName: plan.name,
+        studentNotes: plan.studentNotes ?? '',
+        advisorNotes: loggedInUser.role === UserRole.Faculty ? (plan.advisorNotes ?? '') : void 0,
         majors: planAccomplishments.filter(a => a.type === AccomplishmentType.Major)
           .map(a => a.name),
         minors: planAccomplishments.filter(a => a.type === AccomplishmentType.Minor)
@@ -585,6 +587,125 @@ route.delete('/plannedCourse',
             plannedCourse: courseId
           }
         }
+      })
+        .exec();
+
+      return res.sendStatus(updateResult.matchedCount ? 204 : 404);
+    } catch (e) {
+      if (e instanceof JsonWebTokenError)
+        return res.sendStatus(401);
+      console.error(e);
+      return res.sendStatus(500);
+    }
+  });
+
+route.patch('/studentNotes',
+  header('authorization').isJWT(),
+  query('studentId')
+    .optional()
+    .isLength({
+      min: 32,
+      max: 32
+    }),
+  body('planId').isLength({
+    min: 32,
+    max: 32
+  }),
+  body('notes')
+    .isString(),
+  async (req, res) => {
+    const result = validationResult(req);
+    if (!result.isEmpty())
+      return res
+        .status(400)
+        .send(result.array());
+
+    const { authorization, studentId, planId, notes } = matchedData(req) as {
+      authorization: string;
+      studentId?: UserId;
+      planId: PlanId;
+      notes: string;
+    };
+
+    try {
+      const { userId } = await jwt.verifyAsync(authorization, process.env.JWT_SECRET!) as {
+        userId?: UserId;
+      };
+
+      if (!userId)
+        return res.sendStatus(401);
+
+      const loginData = await getUsers(userId, studentId);
+      if (!loginData)
+        return res.sendStatus(401);
+      const [user] = loginData;
+
+      const updateResult = await PlanModel.updateOne({
+        studentId: user.userId,
+        planId
+      }, {
+        studentNotes: notes
+      })
+        .exec();
+
+      return res.sendStatus(updateResult.matchedCount ? 204 : 404);
+    } catch (e) {
+      if (e instanceof JsonWebTokenError)
+        return res.sendStatus(401);
+      console.error(e);
+      return res.sendStatus(500);
+    }
+  });
+
+route.patch('/advisorNotes',
+  header('authorization').isJWT(),
+  query('studentId')
+    .optional()
+    .isLength({
+      min: 32,
+      max: 32
+    }),
+  body('planId').isLength({
+    min: 32,
+    max: 32
+  }),
+  body('notes')
+    .isString(),
+  async (req, res) => {
+    const result = validationResult(req);
+    if (!result.isEmpty())
+      return res
+        .status(400)
+        .send(result.array());
+
+    const { authorization, studentId, planId, notes } = matchedData(req) as {
+      authorization: string;
+      studentId?: UserId;
+      planId: PlanId;
+      notes: string;
+    };
+
+    try {
+      const { userId } = await jwt.verifyAsync(authorization, process.env.JWT_SECRET!) as {
+        userId?: UserId;
+      };
+
+      if (!userId)
+        return res.sendStatus(401);
+
+      const loginData = await getUsers(userId, studentId);
+      if (!loginData)
+        return res.sendStatus(401);
+      const [user, loggedInUser] = loginData;
+
+      if (loggedInUser.role !== UserRole.Faculty) 
+        return res.sendStatus(401);
+
+      const updateResult = await PlanModel.updateOne({
+        studentId: user.userId,
+        planId
+      }, {
+        advisorNotes: notes
       })
         .exec();
 
