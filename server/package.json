@@ -2,10 +2,15 @@
   "name": "server",
   "module": "src/index.ts",
   "type": "module",
+  "scripts": {
+    "start": "bun run .",
+    "dev": "bun run --watch ."
+  },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^1.7.0",
     "@types/bun": "^1.0.12",
     "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
     "@typescript-eslint/eslint-plugin": "^7.6.0",
     "eslint": "8"
   },
@@ -13,7 +18,12 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@types/cors": "^2.8.17",
+    "cors": "^2.8.5",
     "express": "^4.19.2",
-    "mongoose": "^8.3.1"
+    "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.3.1",
+    "nanoid": "^5.0.7"
   }
 }
