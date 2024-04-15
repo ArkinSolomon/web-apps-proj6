@@ -3,6 +3,9 @@ import { body, header, matchedData, validationResult } from 'express-validator';
 import PlannerUserModel from '../models/userModel';
 import * as jwt from '../jwtAsync';
 import type { LoginResponse, RegisterResponse } from '../../typings/user';
+import { JsonWebTokenError } from 'jsonwebtoken';
+import type { UserId } from '../../typings/id';
+import { UserRole } from '../../typings/enum';
 
 const route = Router();
 
@@ -124,11 +127,79 @@ route.get('/isTokenValid', header('authorization').isJWT(), async (req, res) => 
   };
 
   try {
-    const tokenData = await jwt.verifyAsync(authorization, process.env.JWT_SECRET!);
-    console.log(tokenData);
-    res.sendStatus(tokenData ? 204 : 401);
-  } catch {
-    res.sendStatus(401);
+    const tokenData = await jwt.verifyAsync(authorization, process.env.JWT_SECRET!) as {
+      userId?: UserId;
+    };
+
+    if (!tokenData) 
+      return res.sendStatus(401);
+    
+    const userExists = await PlannerUserModel.exists({
+      userId: tokenData.userId
+    })
+      .exec();
+
+    res.sendStatus(userExists ? 204 : 401);
+  } catch (e) {
+    if (e instanceof JsonWebTokenError)
+      return res.sendStatus(401);
+    console.error(e);
+    res.sendStatus(500);
+  }
+});
+
+route.get('/getAdvisees', header('authorization').isJWT(), async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty())
+    return res.sendStatus(400);
+
+  const { authorization } = matchedData(req) as {
+    authorization: string;
+  };
+
+  try {
+    const tokenData = await jwt.verifyAsync(authorization, process.env.JWT_SECRET!) as {
+      userId?: UserId;
+    };
+
+    if (!tokenData) 
+      return res.sendStatus(401);
+
+    const user = await PlannerUserModel.findOne({
+      userId: tokenData.userId
+    })
+      .exec();
+    
+    if (!user || user.role !== UserRole.Faculty) 
+      return res.sendStatus(401);
+    
+    const result = await PlannerUserModel.aggregate([
+      {
+        $match: {
+          userId: {
+            $in: user.advisees
+          }
+        }
+      },
+      {
+        $project: {
+          userId: 1,
+          name: 1,
+          email: 1,
+          _id: 0
+        }
+      }
+    ])
+      .exec();
+    
+    return res
+      .status(200)
+      .json(result);
+  } catch (e) {
+    if (e instanceof JsonWebTokenError)
+      return res.sendStatus(401);
+    console.error(e);
+    res.sendStatus(500);
   }
 });
 

@@ -1,4 +1,3 @@
-import { URLSearchParams } from 'url';
 import { DataResponse } from '../../../server/typings/planner';
 import userApi from './userApi';
 import { BASE_URL, USER_TOKEN_NAME } from './base';
@@ -10,7 +9,7 @@ import { TermSeason } from '../../../server/typings/enum';
 /**
  * Get the data for the currently logged in user, or for the user from the studentId query parameter.
  * 
- * @returns The response from the server for all of the user's data.
+ * @returns The response from the server for all of the planner's data.
  * @throws {AxiosError} If an error is recieved from the server, or if the user is not logged in.
  */
 async function data(): Promise<DataResponse> {
@@ -224,7 +223,7 @@ async function updatePlanData(planId: PlanId, planName: string, majors: Accompli
 }
 
 function buildReqUrlWithStudent(partialPath: string, required = false) {
-  const queryParams = new URLSearchParams(window.location.href);
+  const queryParams = new URLSearchParams(window.location.search);
   if (queryParams.has('studentId'))
     return BASE_URL + partialPath + '/?' + new URLSearchParams({
       studentId: queryParams.get('studentId')!
