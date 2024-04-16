@@ -1,8 +1,12 @@
 # CS-3220 Web Applications Project 6
 
+## Setup Node.Js
+
+Install Node.Js [here](https://nodejs.org/en). Install Node 21 from the little text underneath the big button.
+
 ## Setup Bun
 
-We will be using Bun for this project. It is very similar to Node.Js (I will change this if required). Install Bun on the command line from [here](https://bun.sh/). For working in the client-side React environment, you should not use Bun built-in functions, only on the server-side. On the client-side, you can still use Bun to start `react-scripts`.
+The data-loader used to load the data into the database uses Bun, not Node.Js. This was before we were informed that Bun was not permitted. However, since this is not technically part of the project, I have not changed it. Install Bun on the command line from [here](https://bun.sh/). No Bun functions should be used for the client or server.
 
 ## Setup Local Environment
 
@@ -19,13 +23,13 @@ You will receive these variable values personally.
 Install TypeScript and EsLint globally by running:
 
 ```sh
-$ bun a -g typescript@5.2.2 eslint@8.57
+$ npm i -g typescript@5.2.2 eslint@8.57
 ```
 
 Go to both the client and server (and data-loader, if you wish) directories and run:
 
 ```sh
-$ bun install
+$ npm install
 ```
 
 to install all of the necessary dependencies.
@@ -53,25 +57,13 @@ To access the settings file, open VSCode settings, click on the "Workspace" tab,
 
 ## Running & Developing
 
-Start the server by going to the server directory and running:
+Start the client or server by going to the server directory and running:
 
 ```sh
-$ bun start
+$ npm run start
 ```
 
-To reload whenver you make a change on the server, use:
-
-```sh
-$ bun dev
-```
-
-For the client, go to the client directory, then use:
-
-```sh
-$ bun start
-```
-
-Which will start the React server, with hot reloading enabled.
+If the database is empty, you need to use the data-loader to load the data. YOU PROBABLY DON'T NEED TO DO THIS. For the data-loader, use `bun file.ts` to pick which data to load. Don't do this multiple times, or else the database will have duplicates.
 
 ## MongoDB Compass
 
