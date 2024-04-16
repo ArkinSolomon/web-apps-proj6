@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { body, header, matchedData, validationResult } from 'express-validator';
-import PlannerUserModel from '../models/userModel';
-import * as jwt from '../jwtAsync';
-import type { LoginResponse, RegisterResponse } from '../../typings/user';
-import { JsonWebTokenError } from 'jsonwebtoken';
-import type { UserId } from '../../typings/id';
-import { UserRole } from '../../typings/enum';
+import PlannerUserModel from '../models/userModel.js';
+import * as jwt from '../jwtAsync.js';
+import type { LoginResponse, RegisterResponse } from '../../typings/user.js';
+import jwtPkg from 'jsonwebtoken';
+import type { UserId } from '../../typings/id.js';
+import { UserRole } from '../../typings/enum.js';
+import bcrypt from 'bcrypt';
 
 const route = Router();
 
@@ -44,7 +45,7 @@ route.post('/register',
           ]
         });
     
-      const passwordHash = await Bun.password.hash(password, 'bcrypt');
+      const passwordHash = await bcrypt.hash(password, 12);
       const newUser = new PlannerUserModel({
         email,
         name,
@@ -94,7 +95,7 @@ route.post('/login',
       if (!user) 
         return res.sendStatus(401);
 
-      const isValid = await Bun.password.verify(password, user.passwordHash, 'bcrypt');
+      const isValid = await bcrypt.compare(password, user.passwordHash);
       if (!isValid)
         return res.sendStatus(401);
 
@@ -141,7 +142,7 @@ route.get('/isTokenValid', header('authorization').isJWT(), async (req, res) => 
 
     res.sendStatus(userExists ? 204 : 401);
   } catch (e) {
-    if (e instanceof JsonWebTokenError)
+    if (e instanceof jwtPkg.JsonWebTokenError)
       return res.sendStatus(401);
     console.error(e);
     res.sendStatus(500);
@@ -196,7 +197,7 @@ route.get('/getAdvisees', header('authorization').isJWT(), async (req, res) => {
       .status(200)
       .json(result);
   } catch (e) {
-    if (e instanceof JsonWebTokenError)
+    if (e instanceof jwtPkg.JsonWebTokenError)
       return res.sendStatus(401);
     console.error(e);
     res.sendStatus(500);

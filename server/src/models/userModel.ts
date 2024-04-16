@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { nanoid } from 'nanoid';
-import type { PlanId, UserId } from '../../typings/id';
-import { TermSeason, UserRole } from '../../typings/enum';
+import type { PlanId, UserId } from '../../typings/id.js';
+import { TermSeason, UserRole } from '../../typings/enum.js';
 
 export type PlannerUser = {
   userId: UserId;

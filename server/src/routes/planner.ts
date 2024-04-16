@@ -1,16 +1,17 @@
 import { Router } from 'express';
 import { body, header, matchedData, query, validationResult } from 'express-validator';
-import * as jwt from '../jwtAsync';
+import * as jwt from '../jwtAsync.js';
 import type { HydratedDocument } from 'mongoose';
-import type { PlannerUser } from '../models/userModel';
-import PlannerUserModel from '../models/userModel';
-import type { DataResponse, SentAccomplishmentData } from '../../typings/planner';
-import PlanModel from '../models/planModel';
-import AccomplishmentModel, { type RequiredCourse } from '../models/accomplishmentModel';
-import { AccomplishmentType, RequirementType, TermSeason, UserRole } from '../../typings/enum';
-import type { AccomplishmentId, CourseId, PlanId, UserId } from '../../typings/id';
-import { JsonWebTokenError } from 'jsonwebtoken';
-import CourseModel from '../models/courseModel';
+import type { PlannerUser } from '../models/userModel.js';
+import PlannerUserModel from '../models/userModel.js';
+import type { DataResponse, SentAccomplishmentData } from '../../typings/planner.js';
+import PlanModel from '../models/planModel.js';
+import AccomplishmentModel, { type RequiredCourse } from '../models/accomplishmentModel.js';
+import { AccomplishmentType, RequirementType, TermSeason, UserRole } from '../../typings/enum.js';
+import type { AccomplishmentId, CourseId, PlanId, UserId } from '../../typings/id.js';
+import jwtPkg from 'jsonwebtoken';
+import CourseModel from '../models/courseModel.js';
+
 const route = Router();
 
 route.get('/data', header('authorization').isJWT(), query('studentId').optional().isLength({
@@ -91,22 +92,21 @@ route.get('/data', header('authorization').isJWT(), query('studentId').optional(
         .lean()
         .exec();
     
-    type SinglePlan = Required<DataResponse>['plans'][PlanId];
-    data.plans[plan.planId] = {
-      planId: plan.planId,
-      planName: plan.name,
-      majors: planAccomplishments.filter(a => a.type === AccomplishmentType.Major)
-        .reduce((majors, accomplishment) => {
-          majors[accomplishment.accomplishmentId] = accomplishment.name;
-          return majors;
-        }, {} as SinglePlan['majors']),
-      minors: planAccomplishments.filter(a => a.type === AccomplishmentType.Minor)
-        .reduce((minors, accomplishment) =>{
-          minors[accomplishment.accomplishmentId] = accomplishment.name;
-          return minors;
-        }, {} as SinglePlan['minors']),
-      catalogYear: plan.catalogYear
-    };
+      data.plans[plan.planId] = {
+        planId: plan.planId,
+        planName: plan.name,
+        majors: planAccomplishments.filter(a => a.type === AccomplishmentType.Major)
+          .reduce((majors, accomplishment) => {
+            majors[accomplishment.accomplishmentId] = accomplishment.name;
+            return majors;
+          }, {} as DataResponse['plans'][PlanId]['majors']),
+        minors: planAccomplishments.filter(a => a.type === AccomplishmentType.Minor)
+          .reduce((minors, accomplishment) =>{
+            minors[accomplishment.accomplishmentId] = accomplishment.name;
+            return minors;
+          }, {} as DataResponse['plans'][PlanId]['minors']),
+        catalogYear: plan.catalogYear
+      };
     }
 
     hasPlan: if (user.activePlanId) {
@@ -276,7 +276,7 @@ route.get('/data', header('authorization').isJWT(), query('studentId').optional(
       .status(200)
       .json(data);
   } catch (e) {
-    if (e instanceof JsonWebTokenError)
+    if (e instanceof jwtPkg.JsonWebTokenError)
       return res.sendStatus(401);
     console.error(e);
     return res.sendStatus(500);
@@ -326,7 +326,7 @@ route.post('/plan', header('authorization').isJWT(), query('studentId').optional
   
     res.sendStatus(204);
   } catch (e) {
-    if (e instanceof JsonWebTokenError)
+    if (e instanceof jwtPkg.JsonWebTokenError)
       return res.sendStatus(401);
     console.error(e);
     return res.sendStatus(500);
@@ -386,7 +386,7 @@ route.delete('/plan',
   
       res.sendStatus(204);
     } catch (e) {
-      if (e instanceof JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError)
         return res.sendStatus(401);
       console.error(e);
       return res.sendStatus(500);
@@ -443,7 +443,7 @@ route.post('/loadPlan',
   
       res.sendStatus(204);
     } catch (e) {
-      if (e instanceof JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError)
         return res.sendStatus(401);
       console.error(e);
       return res.sendStatus(500);
@@ -529,7 +529,7 @@ route.post('/plannedCourse',
   
       res.sendStatus(204);
     } catch (e) {
-      if (e instanceof JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError)
         return res.sendStatus(401);
       console.error(e);
       return res.sendStatus(500);
@@ -592,7 +592,7 @@ route.delete('/plannedCourse',
 
       return res.sendStatus(updateResult.matchedCount ? 204 : 404);
     } catch (e) {
-      if (e instanceof JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError)
         return res.sendStatus(401);
       console.error(e);
       return res.sendStatus(500);
@@ -649,7 +649,7 @@ route.patch('/studentNotes',
 
       return res.sendStatus(updateResult.matchedCount ? 204 : 404);
     } catch (e) {
-      if (e instanceof JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError)
         return res.sendStatus(401);
       console.error(e);
       return res.sendStatus(500);
@@ -710,7 +710,7 @@ route.patch('/advisorNotes',
 
       return res.sendStatus(updateResult.matchedCount ? 204 : 404);
     } catch (e) {
-      if (e instanceof JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError)
         return res.sendStatus(401);
       console.error(e);
       return res.sendStatus(500);
@@ -809,7 +809,7 @@ route.patch('/planData',
       
       res.sendStatus(204);
     } catch (e) {
-      if (e instanceof JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError)
         return res.sendStatus(401);
       console.error(e);
       return res.sendStatus(500);

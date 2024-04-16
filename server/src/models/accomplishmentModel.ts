@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
-import type { AccomplishmentId, CourseId } from '../../typings/id';
-import type { AccomplishmentType, RequirementType } from '../../typings/enum';
+import type { AccomplishmentId, CourseId } from '../../typings/id.js';
+import type { AccomplishmentType, RequirementType } from '../../typings/enum.js';
 import { nanoid } from 'nanoid';
 
 export type Accomplishment = {

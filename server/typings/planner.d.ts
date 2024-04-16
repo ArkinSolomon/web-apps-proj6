@@ -22,35 +22,21 @@ export type DataResponse = {
     yearCount: number;
     studentNotes: string;
     advisorNotes?: string;
-    courses: {
-      [key: CourseId]: PlannedCourse;
-    };
+    courses: Record<CourseId, PlannedCourse>;
   };
-  plans: {
-    [key: PlanId]: {
-      planId: PlanId;
-      planName: string;
-      majors: {
-        [key: AccomplishmentId]: string;
-      };
-      minors: {
-        [key: AccomplishmentId]: string;
-      };
-      catalogYear: number;
-    };
-  };
+  plans: Record<PlanId, {
+    planId: PlanId;
+    planName: string;
+    majors: Record<AccomplishmentId, string>;
+    minors: Record<AccomplishmentId, string>;
+    catalogYear: number;
+  }>;
   catalog?: {
     catalogYear: number;
-    courses: {
-      [key: CourseId]: Omit<Course, 'isGenEd' | 'yearsOffered'>;
-    };
+    courses: Record<CourseId, Omit<Course, 'isGenEd' | 'yearsOffered'>>;
     accomplishments: {
-      majors: {
-        [key: AccomplishmentId]: SentAccomplishmentData;
-      };
-      minors: {
-        [key: AccomplishmentId]: SentAccomplishmentData;
-      };
+      majors: Record<AccomplishmentId, SentAccomplishmentData>;
+      minors: Record<AccomplishmentId, SentAccomplishmentData>;
     };
   };
   requirements?: {

@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import type { CourseId } from '../../typings/id';
+import type { CourseId } from '../../typings/id.js';
 
 export type Course = {
   courseId: CourseId;

@@ -1,9 +1,9 @@
 // This page contains development routes only, that's why there is 0 validation for anything
 
 import { Router } from 'express';
-import CourseModel from '../models/courseModel';
-import AccomplishmentModel from '../models/accomplishmentModel';
-import { AccomplishmentType } from '../../typings/enum';
+import CourseModel from '../models/courseModel.js';
+import AccomplishmentModel from '../models/accomplishmentModel.js';
+import { AccomplishmentType } from '../../typings/enum.js';
 const route = Router();
 
 // This one doesn't work, and I can't figure out why, so I'll just import it straight into Mongo, which really is what I should've done, but I was originally using similar scripts to how it was done for project 5

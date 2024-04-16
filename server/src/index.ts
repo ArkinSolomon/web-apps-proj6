@@ -1,6 +1,9 @@
 import Express from 'express';
-import connect from './models/atlasConnect';
+import connect from './models/atlasConnect.js';
 import cors from 'cors';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 await connect();
 
@@ -9,8 +12,8 @@ app.use(cors());
 app.use(Express.json());
 app.use(Express.urlencoded({ extended: true }));
 
-import userRoute from './routes/user';
-import plannerRoute from './routes/planner';
+import userRoute from './routes/user.js';
+import plannerRoute from './routes/planner.js';
 
 app.use('/user', userRoute);
 app.use('/planner', plannerRoute);
