@@ -77,4 +77,20 @@ In order for a faculty member that has a student as an advisor to access the stu
 
 > To determine if the currently logged in user is a faculty, you can try getting advisors, and then seeing if it throws an error.
 
-P.S. The password to all accounts should be "password", it will make things easier...
+## Packages Used
+
+- **axios** is used on the client side to fetch data from the server.
+- **bcrypt** is used to hash passwords.
+- **cors** is used to allow Express to accept cross-origin requests.
+- **dotenv** is used to load variables from the `.env` file into the environment.
+- **eslint** helps find errors by catching common coding mistakes and enforcing style.
+- **express** is the framework this project is based around.
+- **express-validator** is used to handle request parameter validation and sanitization.
+- **js-cookie** is used to easily manipulate browser cookies on the client side.
+- **react** is the framework this project is based around.
+- **react-dom** is a dependency of React, installed by CRA.
+- **react-scripts** is used to start and manage the React development and build process and was installed by CRA.
+- **jsonwebtoken** is used to create tokens for authentication purposes.
+- **mongoose** is the wrapper we use for MongoDb in order to enforce document validation and dev-time type-checking in combination with TypeScript.
+- **nanoid** is used to generate alphanumeric identifiers.
+- **typescript** helps find errors by providing a strict type-checking system.
