@@ -192,6 +192,30 @@ async function updateAdvisorNotes(planId: PlanId, notes: string): Promise<boolea
 }
 
 /**
+ * Change the number of years in the student's plan. Any courses that are not within the given academic years will be cutoff.
+ * 
+ * @param planId The id of the plan to update.
+ * @param yearCount The number of years in the specified plan.
+ * @returns True if the operation completes successfully, or false otherwise.
+ * @throws If the user is not logged in. Note that an internal server error will not throw.
+ */
+async function updateYearCount(planId: PlanId, yearCount: number): Promise<boolean> {
+  if (!await userApi.isLoggedIn(false)) 
+    throw new Error('User not logged in');
+
+  try {
+    await axios.patch(buildReqUrlWithStudent('/planner/yearCount'), { planId, years: yearCount }, {
+      headers: {
+        'Authorization': Cookies.get(USER_TOKEN_NAME)
+      }
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Update a plan's information. Note that this will completely overwrite the data in the database, so fields that are not modified should pass in their old values.
  * 
  * @param planId The id of the plan to update.
@@ -244,6 +268,7 @@ const plannerApi = {
   deletePlannedCourse,
   updateStudentNotes,
   updateAdvisorNotes,
-  updatePlanData
+  updatePlanData,
+  updateYearCount
 };
 export default plannerApi;

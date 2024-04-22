@@ -816,6 +816,93 @@ route.patch('/planData',
     }
   });
 
+route.patch('/yearCount',
+  header('authorization').isJWT(),
+  query('studentId')
+    .isLength({
+      min: 32,
+      max: 32
+    }),
+  body('planId').isLength({
+    min: 32,
+    max: 32
+  }),
+  body('years').isInt({
+    min: 4, 
+    max: 8
+  }),
+  async (req, res) => {
+    const result = validationResult(req);
+    if (!result.isEmpty())
+      return res
+        .status(400)
+        .send(result.array());
+
+    const { authorization, studentId, planId, years } = matchedData(req) as {
+      authorization: string;
+      studentId?: UserId;
+      planId: PlanId;
+      years: number;
+    };
+
+    try {
+      const { userId } = await jwt.verifyAsync(authorization, process.env.JWT_SECRET!) as {
+        userId?: UserId;
+      };
+
+      if (!userId)
+        return res.sendStatus(401);
+
+      const loginData = await getUsers(userId, studentId);
+      if (!loginData)
+        return res.sendStatus(401);
+      const [user] = loginData;
+
+      const currentPlan = await PlanModel.findOne({
+        studentId: user.userId,
+        planId
+      })
+        .select('-_id -__v +catalogYear')
+        .lean()
+        .exec();
+      
+      if (!currentPlan) 
+        return res.sendStatus(401);
+      const { catalogYear } = currentPlan;
+
+      const updateResult = await PlanModel.updateOne({
+        studentId: user.userId,
+        planId
+      }, {
+        $set: {
+          yearCount: years
+        },
+        $pull: {
+          courses: {
+            $or: [{
+              $and: [
+                { plannedYear: catalogYear + years },
+                { plannedTerm: 'fall' }
+              ]
+            }, {
+              plannedYear: {
+                $gt: catalogYear + years
+              }
+            }]
+          }
+        }
+      })
+        .exec();
+
+      return res.sendStatus(updateResult.matchedCount ? 204 : 404);
+    } catch (e) {
+      if (e instanceof jwtPkg.JsonWebTokenError)
+        return res.sendStatus(401);
+      console.error(e);
+      return res.sendStatus(500);
+    }
+  });
+
 export default route;
 
 async function getUsers(userId: UserId, studentId?: UserId):
