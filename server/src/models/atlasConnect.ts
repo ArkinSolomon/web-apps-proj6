@@ -2,8 +2,9 @@ import mongoose from 'mongoose';
 let isInitialized = false;
 
 export default async function connect() {
-  if (isInitialized) 
+  if (isInitialized) {
     return;
+  }
   
   try {
     await mongoose.connect(process.env.ATLAS_CONNECTION_STRING!, {

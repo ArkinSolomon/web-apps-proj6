@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { GetAdviseesResponse, LoginResponse, RegisterResponse } from '../../../server/typings/user';
 import { BASE_URL, USER_TOKEN_NAME } from './base';
 import Cookies from 'js-cookie';
+import { GetAdviseesResponse, LoginResponse, RegisterResponse } from '../../../server/typings/user';
 
 /**
  * Register a user. Also stores the user's token in a cookie.
@@ -44,8 +44,9 @@ function logout(): void {
  */
 async function isLoggedIn(checkServer = true): Promise<boolean> {
   const token = Cookies.get(USER_TOKEN_NAME);
-  if (!token) 
+  if (!token) {
     return false;
+  }
 
   if (checkServer && !await isTokenValid(token)) {
     Cookies.remove(USER_TOKEN_NAME);
@@ -81,8 +82,9 @@ async function isTokenValid(token: string): Promise<boolean> {
  * @throws {AxiosError} If an error is recieved from the server, if the user is not a faculty, or if the user is not logged in.
  */
 async function getAdvisees(): Promise<GetAdviseesResponse> {
-  if (!await isLoggedIn(false)) 
+  if (!await isLoggedIn(false)) {
     throw new Error('User not logged in');
+  }
 
   const response = await axios.get<GetAdviseesResponse>(BASE_URL + '/user/getAdvisees', {
     headers: {

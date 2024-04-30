@@ -3,7 +3,8 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "start": "tsc --build tsconfig.json && node ./dist/src/index.js"
+    "start": "tsc --build tsconfig.json && node ./dist/src/index.js",
+    "lint": "eslint ./src ./typings --fix"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^1.7.0",

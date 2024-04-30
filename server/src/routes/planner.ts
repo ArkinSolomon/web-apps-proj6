@@ -19,8 +19,9 @@ route.get('/data', header('authorization').isJWT(), query('studentId').optional(
   max: 32
 }), async (req, res) => {
   const result = validationResult(req);
-  if (!result.isEmpty())
+  if (!result.isEmpty()) {
     return res.sendStatus(400);
+  }
 
   const { authorization, studentId } = matchedData(req) as {
     authorization: string;
@@ -32,12 +33,14 @@ route.get('/data', header('authorization').isJWT(), query('studentId').optional(
       userId?: UserId;
     };
 
-    if (!userId) 
+    if (!userId) {
       return res.sendStatus(401);
+    }
 
     const loginData = await getUsers(userId, studentId);
-    if (!loginData)
+    if (!loginData) {
       return res.sendStatus(401);
+    }
     const [user, loggedInUser] = loginData;
 
     const availableYears = await CourseModel.aggregate([
@@ -191,22 +194,23 @@ route.get('/data', header('authorization').isJWT(), query('studentId').optional(
         requirements: RequiredCourse[];
         }];
     
-      if (!reqResult.length)
+      if (!reqResult.length) {
         data.requirements = {
           core: [],
           electives: [],
           cognates: [],
           genEds
         };
-      else {
+      } else {
         const [requirements] = reqResult.map(res => res.requirements);
         const reqMapper = (r: RequiredCourse) => r.requiredCourseId;
 
         const uniqueFilter = () => {
           const seen = new Set<CourseId>();
           return (req: CourseId) => {
-            if (seen.has(req)) 
+            if (seen.has(req)) {
               return false;
+            }
             seen.add(req);
             return true;
           };
@@ -276,8 +280,9 @@ route.get('/data', header('authorization').isJWT(), query('studentId').optional(
       .status(200)
       .json(data);
   } catch (e) {
-    if (e instanceof jwtPkg.JsonWebTokenError)
+    if (e instanceof jwtPkg.JsonWebTokenError) {
       return res.sendStatus(401);
+    }
     console.error(e);
     return res.sendStatus(500);
   }
@@ -288,8 +293,9 @@ route.post('/plan', header('authorization').isJWT(), query('studentId').optional
   max: 32
 }), async (req, res) => {
   const result = validationResult(req);
-  if (!result.isEmpty())
+  if (!result.isEmpty()) {
     return res.sendStatus(400);
+  }
 
   const { authorization, studentId } = matchedData(req) as {
     authorization: string;
@@ -301,12 +307,14 @@ route.post('/plan', header('authorization').isJWT(), query('studentId').optional
       userId?: UserId;
     };
 
-    if (!userId)
+    if (!userId) {
       return res.sendStatus(401);
+    }
 
     const loginData = await getUsers(userId, studentId);
-    if (!loginData)
+    if (!loginData) {
       return res.sendStatus(401);
+    }
     const [user] = loginData;
 
     const bibleMinor = await AccomplishmentModel.findOne({
@@ -326,8 +334,9 @@ route.post('/plan', header('authorization').isJWT(), query('studentId').optional
   
     res.sendStatus(204);
   } catch (e) {
-    if (e instanceof jwtPkg.JsonWebTokenError)
+    if (e instanceof jwtPkg.JsonWebTokenError) {
       return res.sendStatus(401);
+    }
     console.error(e);
     return res.sendStatus(500);
   }
@@ -347,8 +356,9 @@ route.delete('/plan',
   }),
   async (req, res) => {
     const result = validationResult(req);
-    if (!result.isEmpty())
+    if (!result.isEmpty()) {
       return res.sendStatus(400);
+    }
 
     const { authorization, studentId, planId } = matchedData(req) as {
     authorization: string;
@@ -361,12 +371,14 @@ route.delete('/plan',
       userId?: UserId;
     };
 
-      if (!userId)
+      if (!userId) {
         return res.sendStatus(401);
+      }
 
       const loginData = await getUsers(userId, studentId);
-      if (!loginData)
+      if (!loginData) {
         return res.sendStatus(401);
+      }
       const [user] = loginData;
 
       const planToDelete = PlanModel.findOne({
@@ -374,8 +386,9 @@ route.delete('/plan',
         planId
       });
 
-      if (!planToDelete) 
+      if (!planToDelete) {
         return res.sendStatus(404);
+      }
 
       await planToDelete.deleteOne();
 
@@ -386,8 +399,9 @@ route.delete('/plan',
   
       res.sendStatus(204);
     } catch (e) {
-      if (e instanceof jwtPkg.JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError) {
         return res.sendStatus(401);
+      }
       console.error(e);
       return res.sendStatus(500);
     }
@@ -407,8 +421,9 @@ route.post('/loadPlan',
   }),
   async (req, res) => {
     const result = validationResult(req);
-    if (!result.isEmpty())
+    if (!result.isEmpty()) {
       return res.sendStatus(400);
+    }
 
     const { authorization, studentId, planId } = matchedData(req) as {
       authorization: string;
@@ -421,12 +436,14 @@ route.post('/loadPlan',
         userId?: UserId;
       };
 
-      if (!userId)
+      if (!userId) {
         return res.sendStatus(401);
+      }
 
       const loginData = await getUsers(userId, studentId);
-      if (!loginData)
+      if (!loginData) {
         return res.sendStatus(401);
+      }
       const [user] = loginData;
 
       const planExists = await PlanModel.exists({
@@ -435,16 +452,18 @@ route.post('/loadPlan',
       })
         .exec();
 
-      if (!planExists) 
+      if (!planExists) {
         return res.sendStatus(404);
+      }
 
       user.activePlanId = planId;
       await user.save();
   
       res.sendStatus(204);
     } catch (e) {
-      if (e instanceof jwtPkg.JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError) {
         return res.sendStatus(401);
+      }
       console.error(e);
       return res.sendStatus(500);
     }
@@ -475,10 +494,11 @@ route.post('/plannedCourse',
     .withMessage('Invalid year'),
   async (req, res) => {
     const result = validationResult(req);
-    if (!result.isEmpty())
+    if (!result.isEmpty()) {
       return res
         .status(400)
         .send(result.array());
+    }
 
     const { authorization, studentId, planId, courseId, termSeason, termYear } = matchedData(req) as {
       authorization: string;
@@ -494,12 +514,14 @@ route.post('/plannedCourse',
         userId?: UserId;
       };
 
-      if (!userId)
+      if (!userId) {
         return res.sendStatus(401);
+      }
 
       const loginData = await getUsers(userId, studentId);
-      if (!loginData)
+      if (!loginData) {
         return res.sendStatus(401);
+      }
       const [user] = loginData;
 
       const plan = await PlanModel.findOne({
@@ -507,16 +529,18 @@ route.post('/plannedCourse',
         planId
       })
         .exec();
-      if (!plan)
+      if (!plan) {
         return res.sendStatus(404);
+      }
 
       if (
         plan.catalogYear > termYear ||
         (plan.catalogYear === termYear && termSeason !== TermSeason.Fall) ||
         (plan.catalogYear + plan.yearCount === termYear && termSeason === TermSeason.Fall) ||
         plan.catalogYear + plan.yearCount < termYear
-      ) 
+      ) {
         return res.sendStatus(400);
+      }
 
       plan.courses.splice(plan.courses.findIndex(pc => pc.plannedCourse === courseId), 1);
       plan.courses.push({
@@ -529,8 +553,9 @@ route.post('/plannedCourse',
   
       res.sendStatus(204);
     } catch (e) {
-      if (e instanceof jwtPkg.JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError) {
         return res.sendStatus(401);
+      }
       console.error(e);
       return res.sendStatus(500);
     }
@@ -553,10 +578,11 @@ route.delete('/plannedCourse',
     .notEmpty(),
   async (req, res) => {
     const result = validationResult(req);
-    if (!result.isEmpty())
+    if (!result.isEmpty()) {
       return res
         .status(400)
         .send(result.array());
+    }
 
     const { authorization, studentId, planId, courseId } = matchedData(req) as {
       authorization: string;
@@ -570,12 +596,14 @@ route.delete('/plannedCourse',
         userId?: UserId;
       };
 
-      if (!userId)
+      if (!userId) {
         return res.sendStatus(401);
+      }
 
       const loginData = await getUsers(userId, studentId);
-      if (!loginData)
+      if (!loginData) {
         return res.sendStatus(401);
+      }
       const [user] = loginData;
 
       const updateResult = await PlanModel.updateOne({
@@ -592,8 +620,9 @@ route.delete('/plannedCourse',
 
       return res.sendStatus(updateResult.matchedCount ? 204 : 404);
     } catch (e) {
-      if (e instanceof jwtPkg.JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError) {
         return res.sendStatus(401);
+      }
       console.error(e);
       return res.sendStatus(500);
     }
@@ -614,10 +643,11 @@ route.patch('/studentNotes',
     .isString(),
   async (req, res) => {
     const result = validationResult(req);
-    if (!result.isEmpty())
+    if (!result.isEmpty()) {
       return res
         .status(400)
         .send(result.array());
+    }
 
     const { authorization, studentId, planId, notes } = matchedData(req) as {
       authorization: string;
@@ -631,12 +661,14 @@ route.patch('/studentNotes',
         userId?: UserId;
       };
 
-      if (!userId)
+      if (!userId) {
         return res.sendStatus(401);
+      }
 
       const loginData = await getUsers(userId, studentId);
-      if (!loginData)
+      if (!loginData) {
         return res.sendStatus(401);
+      }
       const [user] = loginData;
 
       const updateResult = await PlanModel.updateOne({
@@ -649,8 +681,9 @@ route.patch('/studentNotes',
 
       return res.sendStatus(updateResult.matchedCount ? 204 : 404);
     } catch (e) {
-      if (e instanceof jwtPkg.JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError) {
         return res.sendStatus(401);
+      }
       console.error(e);
       return res.sendStatus(500);
     }
@@ -672,10 +705,11 @@ route.patch('/advisorNotes',
     .isString(),
   async (req, res) => {
     const result = validationResult(req);
-    if (!result.isEmpty())
+    if (!result.isEmpty()) {
       return res
         .status(400)
         .send(result.array());
+    }
 
     const { authorization, studentId, planId, notes } = matchedData(req) as {
       authorization: string;
@@ -689,16 +723,19 @@ route.patch('/advisorNotes',
         userId?: UserId;
       };
 
-      if (!userId)
+      if (!userId) {
         return res.sendStatus(401);
+      }
 
       const loginData = await getUsers(userId, studentId);
-      if (!loginData)
+      if (!loginData) {
         return res.sendStatus(401);
+      }
       const [user, loggedInUser] = loginData;
 
-      if (loggedInUser.role !== UserRole.Faculty) 
+      if (loggedInUser.role !== UserRole.Faculty) {
         return res.sendStatus(401);
+      }
 
       const updateResult = await PlanModel.updateOne({
         studentId: user.userId,
@@ -710,8 +747,9 @@ route.patch('/advisorNotes',
 
       return res.sendStatus(updateResult.matchedCount ? 204 : 404);
     } catch (e) {
-      if (e instanceof jwtPkg.JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError) {
         return res.sendStatus(401);
+      }
       console.error(e);
       return res.sendStatus(500);
     }
@@ -747,10 +785,11 @@ route.patch('/planData',
     .customSanitizer(mStr => mStr.split(/\s*,\s*/)),
   async (req, res) => {
     const result = validationResult(req);
-    if (!result.isEmpty())    
+    if (!result.isEmpty()) {
       return res
         .status(400)
         .json(result.array());
+    }
 
     const requestData = matchedData(req) as {
       authorization: string;
@@ -768,12 +807,14 @@ route.patch('/planData',
       userId?: UserId;
     };
 
-      if (!userId)
+      if (!userId) {
         return res.sendStatus(401);
+      }
 
       const loginData = await getUsers(userId, studentId);
-      if (!loginData)
+      if (!loginData) {
         return res.sendStatus(401);
+      }
       const [user] = loginData;
 
       const plan = await PlanModel.findOne({
@@ -782,14 +823,17 @@ route.patch('/planData',
       })
         .exec();
       
-      if (!plan)
+      if (!plan) {
         return res.sendStatus(404);
+      }
       
-      if (majors.length === 1 && majors[0] === '') 
+      if (majors.length === 1 && majors[0] === '') {
         majors = [];
+      }
 
-      if (minors.length === 1 && minors[0] === '') 
+      if (minors.length === 1 && minors[0] === '') {
         minors = [];
+      }
 
       const allAccomplishments = majors.concat(minors);
       const count = await AccomplishmentModel.countDocuments({
@@ -799,8 +843,9 @@ route.patch('/planData',
       })
         .exec();
       
-      if (allAccomplishments.length !== count)
+      if (allAccomplishments.length !== count) {
         return res.sendStatus(400);
+      }
 
       plan.name = planName;
       plan.accomplishments = allAccomplishments;
@@ -809,8 +854,9 @@ route.patch('/planData',
       
       res.sendStatus(204);
     } catch (e) {
-      if (e instanceof jwtPkg.JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError) {
         return res.sendStatus(401);
+      }
       console.error(e);
       return res.sendStatus(500);
     }
@@ -819,6 +865,7 @@ route.patch('/planData',
 route.patch('/yearCount',
   header('authorization').isJWT(),
   query('studentId')
+    .optional()
     .isLength({
       min: 32,
       max: 32
@@ -833,10 +880,11 @@ route.patch('/yearCount',
   }),
   async (req, res) => {
     const result = validationResult(req);
-    if (!result.isEmpty())
+    if (!result.isEmpty()) {
       return res
         .status(400)
         .send(result.array());
+    }
 
     const { authorization, studentId, planId, years } = matchedData(req) as {
       authorization: string;
@@ -850,24 +898,27 @@ route.patch('/yearCount',
         userId?: UserId;
       };
 
-      if (!userId)
+      if (!userId) {
         return res.sendStatus(401);
+      }
 
       const loginData = await getUsers(userId, studentId);
-      if (!loginData)
+      if (!loginData) {
         return res.sendStatus(401);
+      }
       const [user] = loginData;
 
       const currentPlan = await PlanModel.findOne({
         studentId: user.userId,
         planId
       })
-        .select('-_id -__v +catalogYear')
+        .select('+catalogYear')
         .lean()
         .exec();
       
-      if (!currentPlan) 
+      if (!currentPlan) {
         return res.sendStatus(401);
+      }
       const { catalogYear } = currentPlan;
 
       const updateResult = await PlanModel.updateOne({
@@ -896,8 +947,9 @@ route.patch('/yearCount',
 
       return res.sendStatus(updateResult.matchedCount ? 204 : 404);
     } catch (e) {
-      if (e instanceof jwtPkg.JsonWebTokenError)
+      if (e instanceof jwtPkg.JsonWebTokenError) {
         return res.sendStatus(401);
+      }
       console.error(e);
       return res.sendStatus(500);
     }
@@ -913,18 +965,21 @@ async function getUsers(userId: UserId, studentId?: UserId):
   })
     .exec();
   
-  if (!user) 
+  if (!user) {
     return null;
+  }
   loggedInUser = user;
 
   otherUserCheck: if (studentId) {
-    if (user.role === UserRole.Student)
-      if (user.userId !== studentId)
+    if (user.role === UserRole.Student) {
+      if (user.userId !== studentId) {
         return null;
-      else
+      } else {
         break otherUserCheck;
-    else if (user.role === UserRole.Faculty && !user.advisees.includes(studentId))
+      }
+    } else if (user.role === UserRole.Faculty && !user.advisees.includes(studentId)) {
       return null;
+    }
 
     user = await PlannerUserModel.findOne({
       userId: studentId
@@ -938,10 +993,12 @@ async function getUsers(userId: UserId, studentId?: UserId):
       return null;
     }
 
-    if (user.advisor !== loggedInUser.userId)
+    if (user.advisor !== loggedInUser.userId) {
       return null;
-  } else if (user.role === UserRole.Faculty)
+    }
+  } else if (user.role === UserRole.Faculty) {
     return null;
+  }
   
   return [user, loggedInUser];
 }

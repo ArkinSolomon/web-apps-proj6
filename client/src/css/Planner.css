@@ -1,0 +1,48 @@
+#root {
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+}
+
+header {
+  flex-shrink: 1;
+}
+
+header>* {
+  margin: 10px 8px;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 15% 1fr;
+  grid-template-rows: 1fr 30%;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+header, main>div {
+  border: 1px solid black;
+}
+
+#upper-right, #lower-right {
+  overflow-y: scroll;
+  position: relative;
+}
+
+#ur-utils {
+  position: static;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 40px;
+  border-top: 1px solid black;
+  display: flex;
+  justify-content: space-between;
+  align-content: center;
+  padding: 3px 10px;
+  background-color: white;
+}
+
+#ur-util-spacer {
+  flex-grow: 1;
+}

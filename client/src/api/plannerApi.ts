@@ -1,10 +1,10 @@
-import { DataResponse } from '../../../server/typings/planner';
 import userApi from './userApi';
 import { BASE_URL, USER_TOKEN_NAME } from './base';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { AccomplishmentId, CourseId, PlanId } from '../../../server/typings/id';
-import { TermSeason } from '../../../server/typings/enum';
+import { DataResponse } from '../../../server/typings/planner';
+import { PlanId, CourseId, AccomplishmentId } from '../../../server/typings/id';
+import { TermSeason } from '../enum';
 
 /**
  * Get the data for the currently logged in user, or for the user from the studentId query parameter.
@@ -13,8 +13,9 @@ import { TermSeason } from '../../../server/typings/enum';
  * @throws {AxiosError} If an error is recieved from the server, or if the user is not logged in.
  */
 async function data(): Promise<DataResponse> {
-  if (!await userApi.isLoggedIn(false)) 
+  if (!await userApi.isLoggedIn(false)) {
     throw new Error('User not logged in');
+  }
 
   const response = await axios.get<DataResponse>(buildReqUrlWithStudent('/planner/data'), {
     headers: {
@@ -31,8 +32,9 @@ async function data(): Promise<DataResponse> {
  * @throws {AxiosError} If an error is recieved from the server, or if the user is not logged in.
  */
 async function createPlan(): Promise<void> {
-  if (!await userApi.isLoggedIn(false)) 
+  if (!await userApi.isLoggedIn(false)) {
     throw new Error('User not logged in');
+  }
 
   await axios.post(buildReqUrlWithStudent('/planner/plan'), {}, {
     headers: {
@@ -48,8 +50,9 @@ async function createPlan(): Promise<void> {
  * @throws {AxiosError} If an error is recieved from the server, the plan doesn't exist, or if the user is not logged in.
  */
 async function deletePlan(planId: PlanId): Promise<void> {
-  if (!await userApi.isLoggedIn(false)) 
+  if (!await userApi.isLoggedIn(false)) {
     throw new Error('User not logged in');
+  }
 
   await axios({
     url: buildReqUrlWithStudent('/planner/plan'),
@@ -70,8 +73,9 @@ async function deletePlan(planId: PlanId): Promise<void> {
  * @throws {AxiosError} If an error is recieved from the server, the plan doesn't exist, or if the user is not logged in.
  */
 async function loadPlan(planId: PlanId): Promise<void> {
-  if (!await userApi.isLoggedIn(false)) 
+  if (!await userApi.isLoggedIn(false)) {
     throw new Error('User not logged in');
+  }
 
   await axios.post(buildReqUrlWithStudent('/planner/loadPlan'), {
     planId
@@ -93,8 +97,9 @@ async function loadPlan(planId: PlanId): Promise<void> {
  * @throws If the user is not logged in. Note that an internal server error will not throw.
  */
 async function planCourse(planId: PlanId, courseId: CourseId, season: TermSeason, year: number): Promise<boolean> {
-  if (!await userApi.isLoggedIn(false)) 
+  if (!await userApi.isLoggedIn(false)) {
     throw new Error('User not logged in');
+  }
 
   try {
     await axios.post(buildReqUrlWithStudent('/planner/plannedCourse'), {
@@ -122,8 +127,9 @@ async function planCourse(planId: PlanId, courseId: CourseId, season: TermSeason
  * @throws If the user is not logged in. Note that an internal server error will not throw.
  */
 async function deletePlannedCourse(planId: PlanId, courseId: CourseId): Promise<boolean> {
-  if (!await userApi.isLoggedIn(false)) 
+  if (!await userApi.isLoggedIn(false)) {
     throw new Error('User not logged in');
+  }
 
   try {
     await axios({
@@ -152,8 +158,9 @@ async function deletePlannedCourse(planId: PlanId, courseId: CourseId): Promise<
  * @throws If the user is not logged in. Note that an internal server error will not throw.
  */
 async function updateStudentNotes(planId: PlanId, notes: string): Promise<boolean> {
-  if (!await userApi.isLoggedIn(false)) 
+  if (!await userApi.isLoggedIn(false)) {
     throw new Error('User not logged in');
+  }
 
   try {
     await axios.patch(buildReqUrlWithStudent('/planner/studentNotes'), { planId, notes }, {
@@ -176,8 +183,9 @@ async function updateStudentNotes(planId: PlanId, notes: string): Promise<boolea
  * @throws If the user is not logged in. Note that an internal server error will not throw, nor will if the user is unauthorized.
  */
 async function updateAdvisorNotes(planId: PlanId, notes: string): Promise<boolean> {
-  if (!await userApi.isLoggedIn(false)) 
+  if (!await userApi.isLoggedIn(false)) {
     throw new Error('User not logged in');
+  }
 
   try {
     await axios.patch(buildReqUrlWithStudent('/planner/advisorNotes'), { planId, notes }, {
@@ -200,8 +208,9 @@ async function updateAdvisorNotes(planId: PlanId, notes: string): Promise<boolea
  * @throws If the user is not logged in. Note that an internal server error will not throw.
  */
 async function updateYearCount(planId: PlanId, yearCount: number): Promise<boolean> {
-  if (!await userApi.isLoggedIn(false)) 
+  if (!await userApi.isLoggedIn(false)) {
     throw new Error('User not logged in');
+  }
 
   try {
     await axios.patch(buildReqUrlWithStudent('/planner/yearCount'), { planId, years: yearCount }, {
@@ -226,8 +235,9 @@ async function updateYearCount(planId: PlanId, yearCount: number): Promise<boole
  * @throws If the user is not logged in. Note that an internal server error will not throw, nor will if the user is unauthorized.
  */
 async function updatePlanData(planId: PlanId, planName: string, majors: AccomplishmentId[], minors: AccomplishmentId[]): Promise<boolean> {
-  if (!await userApi.isLoggedIn(false)) 
+  if (!await userApi.isLoggedIn(false)) {
     throw new Error('User not logged in');
+  }
 
   try {
     await axios.patch(buildReqUrlWithStudent('/planner/planData'), {
@@ -248,13 +258,15 @@ async function updatePlanData(planId: PlanId, planName: string, majors: Accompli
 
 function buildReqUrlWithStudent(partialPath: string, required = false) {
   const queryParams = new URLSearchParams(window.location.search);
-  if (queryParams.has('studentId'))
+  if (queryParams.has('studentId')) {
     return BASE_URL + partialPath + '/?' + new URLSearchParams({
       studentId: queryParams.get('studentId')!
     }).toString();
+  }
   
-  if (required) 
+  if (required) {
     throw new Error('A student id was required for this route, but it was not provided');
+  }
   
   return BASE_URL + partialPath;
 }

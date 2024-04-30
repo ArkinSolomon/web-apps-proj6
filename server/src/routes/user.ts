@@ -20,8 +20,9 @@ route.post('/register',
   async (req, res) => {
     try {
       const result = validationResult(req);
-      if (!result.isEmpty())
+      if (!result.isEmpty()) {
         return res.json(result.array());
+      }
 
       const { email, password, name } = matchedData(req) as {
         email: string;
@@ -33,7 +34,7 @@ route.post('/register',
         email
       })
         .exec();
-      if (existingCount)
+      if (existingCount) {
         return res.json({
           'errors': [
             {
@@ -44,6 +45,7 @@ route.post('/register',
             }
           ]
         });
+      }
     
       const passwordHash = await bcrypt.hash(password, 12);
       const newUser = new PlannerUserModel({
@@ -79,8 +81,9 @@ route.post('/login',
   async (req, res) => {
     try {
       const result = validationResult(req);
-      if (!result.isEmpty()) 
+      if (!result.isEmpty()) {
         return res.json(result.array());
+      }
 
       const { email, password } = matchedData(req) as {
       email: string;
@@ -92,12 +95,14 @@ route.post('/login',
       })
         .select('-_id -__v')
         .exec();
-      if (!user) 
+      if (!user) {
         return res.sendStatus(401);
+      }
 
       const isValid = await bcrypt.compare(password, user.passwordHash);
-      if (!isValid)
+      if (!isValid) {
         return res.sendStatus(401);
+      }
 
       const token = await jwt.signAsync({
         userId: user.userId
@@ -110,8 +115,6 @@ route.post('/login',
         .json({
           token
         } as LoginResponse);
-
-      res.sendStatus(204);
     } catch (e) {
       console.error(e);
       res.sendStatus(500);
@@ -120,8 +123,9 @@ route.post('/login',
   
 route.get('/isTokenValid', header('authorization').isJWT(), async (req, res) => {
   const result = validationResult(req);
-  if (!result.isEmpty())
+  if (!result.isEmpty()) {
     return res.sendStatus(400);
+  }
 
   const { authorization } = matchedData(req) as {
     authorization: string;
@@ -132,8 +136,9 @@ route.get('/isTokenValid', header('authorization').isJWT(), async (req, res) => 
       userId?: UserId;
     };
 
-    if (!tokenData) 
+    if (!tokenData) {
       return res.sendStatus(401);
+    }
     
     const userExists = await PlannerUserModel.exists({
       userId: tokenData.userId
@@ -142,8 +147,9 @@ route.get('/isTokenValid', header('authorization').isJWT(), async (req, res) => 
 
     res.sendStatus(userExists ? 204 : 401);
   } catch (e) {
-    if (e instanceof jwtPkg.JsonWebTokenError)
+    if (e instanceof jwtPkg.JsonWebTokenError) {
       return res.sendStatus(401);
+    }
     console.error(e);
     res.sendStatus(500);
   }
@@ -151,8 +157,9 @@ route.get('/isTokenValid', header('authorization').isJWT(), async (req, res) => 
 
 route.get('/getAdvisees', header('authorization').isJWT(), async (req, res) => {
   const result = validationResult(req);
-  if (!result.isEmpty())
+  if (!result.isEmpty()) {
     return res.sendStatus(400);
+  }
 
   const { authorization } = matchedData(req) as {
     authorization: string;
@@ -163,16 +170,18 @@ route.get('/getAdvisees', header('authorization').isJWT(), async (req, res) => {
       userId?: UserId;
     };
 
-    if (!tokenData) 
+    if (!tokenData) {
       return res.sendStatus(401);
+    }
 
     const user = await PlannerUserModel.findOne({
       userId: tokenData.userId
     })
       .exec();
     
-    if (!user || user.role !== UserRole.Faculty) 
+    if (!user || user.role !== UserRole.Faculty) {
       return res.sendStatus(401);
+    }
     
     const result = await PlannerUserModel.aggregate([
       {
@@ -197,8 +206,9 @@ route.get('/getAdvisees', header('authorization').isJWT(), async (req, res) => {
       .status(200)
       .json(result);
   } catch (e) {
-    if (e instanceof jwtPkg.JsonWebTokenError)
+    if (e instanceof jwtPkg.JsonWebTokenError) {
       return res.sendStatus(401);
+    }
     console.error(e);
     res.sendStatus(500);
   }

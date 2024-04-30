@@ -1,0 +1,28 @@
+#course-table {
+  width: 99%;
+  margin: 10px auto;
+}
+
+.sortable-header {
+  cursor: pointer;
+}
+
+.sortable-header.active-sort {
+  text-decoration: underline;
+}
+
+#course-table thead {
+  background: lightgray;
+}
+
+#course-table #col-group-id {
+  width: 8%;
+}
+
+#course-table #col-group-name {
+  width: 24%;
+}
+
+#course-table #col-group-id {
+  width: 5%; 
+}
