@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import userApi from '../api/userApi';
 import '../css/Faculty.css';
 import { BasicDataResponse, GetAdviseesResponse } from '../../../server/typings/user';
+import { UserRole } from '../enum';
 
 export default function Faculty() {
   const [advisees, setAdvisees] = useState<GetAdviseesResponse | null > (null);
@@ -12,12 +13,13 @@ export default function Faculty() {
   useEffect(() => {
     (async () => {
       try {
-        const [adviseeResponse, basicDataResponse] = await Promise.all([
-          userApi.getAdvisees(),
-          userApi.basicData()
-        ]);
-        setAdvisees(adviseeResponse);
-        setBasicData(basicDataResponse);
+
+        const basicData = await userApi.basicData();
+        if (basicData.role !== UserRole.Faculty) {
+          window.location.href = '/planner';
+        }
+        setBasicData(basicData);
+        setAdvisees(await userApi.getAdvisees());
       } catch {
         setHasError(true);
       } finally {
