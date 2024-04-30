@@ -44,7 +44,7 @@ export default class Requirements extends Component<RequirementsProps, Requireme
   private _reqToElem(prefix: string) {
     return (req: CourseId) => {
       const course = this.props.catalogCourses[req];
-      return <p className='req-course' key={`${prefix}-${course.courseId}-${course.name}`}>{course.courseId} {course.name}</p>;
+      return <p draggable onDragStart={e => e.dataTransfer.setData('courseId', req)} className={`req-course requirement-${course.courseId}` + (this.state.metRequirements.includes(req) ? ' course-fullfilled' : '')} key={`${prefix}-${course.courseId}-${course.name}`}>{course.courseId} {course.name}</p>;
     };
   }
 

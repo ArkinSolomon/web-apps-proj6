@@ -1,6 +1,7 @@
 .year-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr;
   gap: 10px;
   min-height: 80px;
   margin-bottom: 10px;
@@ -9,11 +10,4 @@
 
 .year-row:last-of-type {
   margin-bottom: 0;
-}
-
-.year-row > div {
-  flex-grow: 1;
-  border: 1px solid black;
-  border-radius: 7px;
-  padding: 3px;
 }

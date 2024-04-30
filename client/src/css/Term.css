@@ -1,0 +1,20 @@
+.plan-term {
+  flex-grow: 1;
+  border: 1px solid black;
+  border-radius: 7px;
+  padding: 3px;
+}
+
+.planned-course-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.planned-course-row:has(.planned-course-remove:hover) {
+  color: red;
+}
+
+.planned-course, .planned-course-remove {
+  cursor: pointer;
+}

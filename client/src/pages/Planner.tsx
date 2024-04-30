@@ -120,7 +120,53 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
     const { catalogYear, yearCount, courses } = this.state.data!.plan!;
     for (let i = 0; i < yearCount; ++i) {
       const year = catalogYear + i;
-      years.push(<Year courses={courses} year={year} key={'year-' + year} />);
+      years.push(<Year allCourses={this.state.data!.catalog!.courses} courses={courses} year={year} key={'year-' + year} onCourseAdded={(year, termSeason, courseId) => {
+        const dataCopy = { ...this.state.data! };
+        const oldData = { ...this.state.data! };
+
+        dataCopy.plan!.courses[courseId] = {
+          plannedCourse: courseId,
+          plannedTerm: termSeason,
+          plannedYear: year
+        };
+
+        $(`.requirement-${courseId}`).addClass('course-fullfilled');
+
+        plannerApi.planCourse(this.state.data!.plan!.planId, courseId, termSeason, year)
+          .then(result => {
+            if (!result) {
+              $(`.requirement-${courseId}`).removeClass('course-fullfilled');
+              this.setState({
+                data: oldData
+              });
+            }
+          });
+
+        this.setState({
+          data: dataCopy
+        });
+      }}
+      onCourseRemoved={(courseId) => {
+        const dataCopy = { ...this.state.data! };
+        const oldData = { ...this.state.data! };
+  
+        delete dataCopy.plan!.courses[courseId];
+        $(`.requirement-${courseId}`).removeClass('course-fullfilled');
+        plannerApi.deletePlannedCourse(this.state.data!.plan!.planId, courseId)
+          .then(result => {
+            if (!result) {
+              $(`.requirement-${courseId}`).addClass('course-fullfilled');
+              this.setState({
+                data: oldData
+              });
+            }
+          });
+  
+        this.setState({
+          data: dataCopy
+        });
+      }}
+      />);
     }
 
     return years;
@@ -176,7 +222,7 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
         </header>
         <main>
           <div id='upper-left'>
-            {this.state.data?.plan && <Requirements catalogCourses={this.state.data!.catalog!.courses} requirements={this.state.data!.requirements!} plannedCourses={this.state.data!.plan!.courses} />}
+            {this.state.data?.plan && <Requirements catalogCourses={this.state.data!.catalog!.courses} requirements={this.state.data!.requirements!} plannedCourses={this.state.data!.plan!.courses} key={null} />}
           </div>
           <div id='upper-right'>
             {
