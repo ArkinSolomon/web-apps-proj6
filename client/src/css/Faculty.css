@@ -1,0 +1,38 @@
+#root {
+  padding: 10px;
+}
+
+#advisee-table thead {
+  background-color: lightgray;
+}
+
+#advisee-table tr,
+#advisee-table td {
+  border: 1px solid black;
+  padding: 4px;
+}
+
+#faculty-header h1 {
+  width: 100%;
+  text-align: center;
+}
+
+#faculty-greeting {
+  right: 20px;
+  position: absolute;
+}
+
+#faculty-greeting span {
+  font-weight: bold;
+}
+
+.modify-plan-button,
+.modify-plan-button:hover,
+.modify-plan-button:visited,
+#faculty-greeting a,
+#faculty-greeting a:hover,
+#faculty-greeting a:visited {
+  text-decoration: underline;
+  color: black;
+  cursor: pointer;
+}

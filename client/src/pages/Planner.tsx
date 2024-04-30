@@ -24,7 +24,7 @@ import CourseTable from '../components/CourseTable';
 import Requirements from '../components/Requirements';
 import PlanManager from '../components/PlanManager';
 import $ from 'jquery';
-import { TermSeason } from '../enum';
+import { TermSeason, UserRole } from '../enum';
 import { CourseId } from '../../../server/typings/id';
 import Notes from '../components/Notes';
 
@@ -49,20 +49,28 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
           window.location.href = '/login';
         }
          
-        const [data, isFaculty] = await Promise.all([plannerApi.data(), new Promise<boolean>(resolve => {
-          userApi
-            .getAdvisees()
-            .then(() => resolve(true))
-            .catch(() => resolve(false));
-        })]);
+        const [data, basicData] = await Promise.allSettled([plannerApi.data(), userApi.basicData()]);
+
+        if (basicData.status === 'fulfilled' && basicData.value.role === UserRole.Faculty && !window.location.search.includes('studentId')) {
+          window.location.href = '/faculty';
+        }
+
+        if (data.status === 'rejected') {
+          throw new Error('Could not retreive data');
+        }
+
         this.setState({
           loaded: true,
-          data,
-          isFaculty
+          data: data.status === 'fulfilled' ? data.value : void 0,
+          isFaculty: basicData.status === 'fulfilled' && basicData.value.role === UserRole.Faculty
         });
-      } catch {
+      } catch (e) {
+        let message = e;
+        if (e instanceof Object && 'message' in e && typeof e.message === 'string') {
+          message = e.message;
+        }
         this.setState({
-          error: 'An error occured.'
+          error: typeof message === 'string' ? message : 'An unknown error occured'
         });
       }
     })();
@@ -88,7 +96,27 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
     let dialogContent;
     switch (this.state.dialogMode) {
     case DialogMode.FacultyNotes:
-      dialogContent = <p>Faculty notes</p>;
+      dialogContent = <Notes title='Advisor Notes' value={this.state.data!.plan!.advisorNotes ?? ''} onChange={notes => {
+        const dataCp = JSON.parse(JSON.stringify(this.state.data)) as Required<typeof this.state>['data'];
+        const oldData = JSON.parse(JSON.stringify(this.state.data)) as Required<typeof this.state>['data'];
+
+        dataCp.plan!.advisorNotes = notes;
+        plannerApi
+          .updateAdvisorNotes(this.state.data!.plan!.planId, notes)
+          .then(result => {
+            if (!result) {
+              this.setState({
+                data: oldData
+              });
+            }
+          });
+
+        this.setState({
+          data: dataCp,
+          dialogMode: DialogMode.Hidden
+        });
+      }}
+      />;
       break;
     case DialogMode.StudentNotes:
       dialogContent = <Notes title='Student Notes' value={this.state.data!.plan!.studentNotes} onChange={notes => {
@@ -265,7 +293,10 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
                     dialogMode: DialogMode.StudentNotes
                   })}
                   >Student Notes</button>
-                  {this.state.isFaculty && <button>Advisor Notes</button>}
+                  {this.state.isFaculty && <button onClick={() => this.setState({
+                    dialogMode: DialogMode.FacultyNotes
+                  })}
+                  >Advisor Notes</button>}
                   <div className='spacer' />
                   <button id='add-year-button' disabled={this.state.data!.plan!.yearCount >= 8} onClick={() => this._updateYearCount(1)}>+ Add Year</button>
                   <button disabled={this.state.data!.plan!.yearCount <= 4} onClick={() => {
@@ -301,7 +332,8 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
           </div>
           <div id='lower-left'>
             <p>Hello, <span>{this.state.data?.loggedInName}</span>!</p>
-            { this.state.isFaculty && <a>All students</a> }
+            <hr />
+            { this.state.isFaculty && <a href='/faculty'>All students</a> }
             <a id='logout-button' onClick={() => {
               userApi.logout();
               window.location.href = '/login';

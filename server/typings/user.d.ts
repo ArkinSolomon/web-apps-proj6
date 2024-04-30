@@ -1,3 +1,4 @@
+import { UserRole } from './enum.ts';
 import type { UserId } from './id';
 
 type TokenData = {
@@ -12,3 +13,9 @@ export type GetAdviseesResponse = {
   studentEmail: string;
   studentId: UserId;
 }[];
+
+export type BasicDataResponse = {
+  name: string;
+  userId: string;
+  role: UserRole;
+};

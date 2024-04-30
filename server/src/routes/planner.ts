@@ -1013,10 +1013,6 @@ async function getUsers(userId: UserId, studentId?: UserId):
       await loggedInUser.save();
       return null;
     }
-
-    if (user.advisor !== loggedInUser.userId) {
-      return null;
-    }
   } else if (user.role === UserRole.Faculty) {
     return null;
   }

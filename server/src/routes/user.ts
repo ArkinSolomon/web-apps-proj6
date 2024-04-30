@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { body, header, matchedData, validationResult } from 'express-validator';
 import PlannerUserModel from '../models/userModel.js';
 import * as jwt from '../jwtAsync.js';
-import type { LoginResponse, RegisterResponse } from '../../typings/user.js';
+import type { BasicDataResponse, LoginResponse, RegisterResponse } from '../../typings/user.js';
 import jwtPkg from 'jsonwebtoken';
 import type { UserId } from '../../typings/id.js';
 import { UserRole } from '../../typings/enum.js';
@@ -162,7 +162,7 @@ route.get('/isTokenValid', header('authorization').isJWT(), async (req, res) => 
 route.get('/getAdvisees', header('authorization').isJWT(), async (req, res) => {
   const result = validationResult(req);
   if (!result.isEmpty()) {
-    return res.sendStatus(400);
+    return res.sendStatus(401);
   }
 
   const { authorization } = matchedData(req) as {
@@ -187,7 +187,7 @@ route.get('/getAdvisees', header('authorization').isJWT(), async (req, res) => {
       return res.sendStatus(401);
     }
     
-    const result = await PlannerUserModel.aggregate([
+    let result = await PlannerUserModel.aggregate([
       {
         $match: {
           userId: {
@@ -205,6 +205,58 @@ route.get('/getAdvisees', header('authorization').isJWT(), async (req, res) => {
       }
     ])
       .exec();
+    
+    result = result.map(advisee => ({
+      studentName: advisee.name,
+      studentEmail: advisee.email,
+      studentId: advisee.userId
+    }));
+    
+    return res
+      .status(200)
+      .json(result);
+  } catch (e) {
+    if (e instanceof jwtPkg.JsonWebTokenError) {
+      return res.sendStatus(401);
+    }
+    console.error(e);
+    res.sendStatus(500);
+  }
+});
+
+route.get('/basicData', header('authorization').isJWT(), async (req, res) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.sendStatus(401);
+  }
+
+  const { authorization } = matchedData(req) as {
+    authorization: string;
+  };
+
+  try {
+    const tokenData = await jwt.verifyAsync(authorization, process.env.JWT_SECRET!) as {
+      userId?: UserId;
+    };
+
+    if (!tokenData) {
+      return res.sendStatus(401);
+    }
+
+    const user = await PlannerUserModel.findOne({
+      userId: tokenData.userId
+    })
+      .exec();
+
+    if (!user) {
+      return res.sendStatus(400);
+    }
+
+    const result: BasicDataResponse = {
+      name: user.name,
+      userId: user.userId,
+      role: user.role
+    };
     
     return res
       .status(200)

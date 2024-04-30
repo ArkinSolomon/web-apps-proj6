@@ -91,13 +91,22 @@ dialog#main-dialog {
   margin: 2px;
 }
 
-#lower-left, #lower-right {
+#lower-left,
+#lower-right {
   padding: 8px;
 }
 
+#lower-left p {
+  margin: 4px;
+}
+
+#lower-left a:visited,
 #lower-left a {
+  color: black;
   cursor: pointer;
   text-decoration: underline;
+  display: block;
+  width: fit-content;
 }
 
 #logout-button:hover {
@@ -116,4 +125,8 @@ dialog#main-dialog {
   left: 20px;
   top: 20px;
   width: 250px;
+}
+
+#error-wrapper>* {
+  text-align: center;
 }

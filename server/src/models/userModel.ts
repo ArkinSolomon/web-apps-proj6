@@ -12,7 +12,6 @@ export type PlannerUser = {
   currentYear: number;
   currentTerm: TermSeason;
   role: UserRole;
-  advisor?: UserId;
   advisees: UserId[];
 };
 
@@ -56,10 +55,6 @@ const plannerUserSchema = new Schema<PlannerUser>({
     type: String,
     required: true,
     default: UserRole.Student
-  },
-  advisor: {
-    type: String,
-    required: false
   },
   advisees: {
     type: [String],

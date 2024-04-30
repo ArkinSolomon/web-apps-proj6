@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { BASE_URL, USER_TOKEN_NAME } from './base';
 import Cookies from 'js-cookie';
-import { GetAdviseesResponse, LoginResponse, RegisterResponse } from '../../../server/typings/user';
+import { BasicDataResponse, GetAdviseesResponse, LoginResponse, RegisterResponse } from '../../../server/typings/user';
 
 /**
  * Register a user. Also stores the user's token in a cookie.
@@ -95,13 +95,34 @@ async function getAdvisees(): Promise<GetAdviseesResponse> {
   return response.data;
 }
 
+/**
+ * Get the basic data of the currently logged in user.
+ * 
+ * @returns The user's basic data.
+ * @throws {AxiosError} If an error is recieved from the server, if the user is not a faculty, or if the user is not logged in.
+ */
+async function basicData(): Promise<BasicDataResponse> {
+  if (!await isLoggedIn(false)) {
+    throw new Error('User not logged in');
+  }
+
+  const response = await axios.get<BasicDataResponse>(BASE_URL + '/user/basicData', {
+    headers: {
+      'Authorization': Cookies.get(USER_TOKEN_NAME)
+    }
+  });
+
+  return response.data;
+}
+
 const userApi = {
   register,
   login,
   logout,
   isLoggedIn,
   isTokenValid,
-  getAdvisees
+  getAdvisees,
+  basicData
 };
 
 export default userApi;
