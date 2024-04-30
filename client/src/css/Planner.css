@@ -6,10 +6,38 @@
 
 header {
   flex-shrink: 1;
+  min-height: 45px;
+  display: flex;
+  flex-direction: row;
+  align-content: flex-end;
+  justify-content: space-between;
+  padding: 0 10px;
 }
 
-header>* {
-  margin: 10px 8px;
+header h1 {
+  margin: 0;
+}
+
+#header-info-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  column-gap: 20px;
+}
+
+#header-info-box p {
+  margin: 0;
+}
+
+#lower-left p span,
+#header-info-box p span,
+#header-info-box p a {
+  font-weight: bold;
+}
+
+#header-info-box p a {
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 main {
@@ -20,11 +48,13 @@ main {
   overflow: hidden;
 }
 
-header, main>div {
+header,
+main>div {
   border: 1px solid black;
 }
 
-#upper-right, #lower-right {
+#upper-right,
+#lower-right {
   overflow-y: scroll;
   position: relative;
 }
@@ -43,6 +73,20 @@ header, main>div {
   background-color: white;
 }
 
-#ur-util-spacer {
+dialog#main-dialog {
+  width: 80vw;
+  height: 80vh;
+}
+
+.spacer {
   flex-grow: 1;
+}
+
+#lower-left a {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+#logout-button:hover {
+  color: red;
 }

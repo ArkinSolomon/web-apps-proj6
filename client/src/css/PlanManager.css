@@ -1,0 +1,11 @@
+#acc-add-section {
+  width: 80%;
+  margin: 1px auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.acc-half {
+  width: 44%;
+}

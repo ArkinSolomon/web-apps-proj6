@@ -1,0 +1,8 @@
+/* Overwrite jquery default*/
+.ui-accordion-content {
+  padding: 9px 7px !important;
+}
+
+.req-course {
+  font-size: 11pt;
+}

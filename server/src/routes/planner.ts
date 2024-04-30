@@ -66,8 +66,8 @@ route.get('/data', header('authorization').isJWT(), query('studentId').optional(
       }
     ])
       .exec() as [{
-      yearsOffered: number[];
-    }];
+        uniqueValues: number[];
+      }];
     const data: DataResponse = {
       loggedInId: loggedInUser.userId,
       loggedInName: loggedInUser.name,
@@ -75,7 +75,7 @@ route.get('/data', header('authorization').isJWT(), query('studentId').optional(
       studentName: user.name,
       currentTerm: user.currentTerm,
       currentYear: user.currentYear,
-      availableCatalogs: availableYears.length ? availableYears[0].yearsOffered : [],
+      availableCatalogs: availableYears.length ? availableYears[0].uniqueValues : [],
       plans: {}
     };
 
@@ -248,7 +248,7 @@ route.get('/data', header('authorization').isJWT(), query('studentId').optional(
         yearsOffered: plan.catalogYear
       })
         .lean()
-        .select('-_id -__v -yearsOffered')
+        .select('-_id -__v -yearsOffered -requirements')
         .exec();
     
       type SentAccomplishmentDataDict = { [key: AccomplishmentId]: SentAccomplishmentData; };
@@ -288,59 +288,70 @@ route.get('/data', header('authorization').isJWT(), query('studentId').optional(
   }
 });
 
-route.post('/plan', header('authorization').isJWT(), query('studentId').optional().isLength({
-  min: 32,
-  max: 32
-}), async (req, res) => {
-  const result = validationResult(req);
-  if (!result.isEmpty()) {
-    return res.sendStatus(400);
-  }
+route.post('/plan',
+  header('authorization').isJWT(),
+  query('studentId').optional().isLength({
+    min: 32,
+    max: 32
+  }),
+  body('catYear')
+    .isNumeric()
+    .custom(y => y > 2000 && y < 2100)
+    .withMessage('Invalid year'),
+  async (req, res) => {
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+      return res
+        .status(400)
+        .send(result.array());
+    }
 
-  const { authorization, studentId } = matchedData(req) as {
-    authorization: string;
-    studentId?: UserId;
-  };
-
-  try {
-    const { userId } = await jwt.verifyAsync(authorization, process.env.JWT_SECRET!) as {
-      userId?: UserId;
+    const { authorization, studentId, catYear } = matchedData(req) as {
+      authorization: string;
+      studentId?: UserId;
+      catYear: number;
     };
 
-    if (!userId) {
-      return res.sendStatus(401);
-    }
+    try {
+      const { userId } = await jwt.verifyAsync(authorization, process.env.JWT_SECRET!) as {
+        userId?: UserId;
+      };
 
-    const loginData = await getUsers(userId, studentId);
-    if (!loginData) {
-      return res.sendStatus(401);
-    }
-    const [user] = loginData;
+      if (!userId) {
+        return res.sendStatus(401);
+      }
 
-    const bibleMinor = await AccomplishmentModel.findOne({
-      name: 'Bible',
-      type: AccomplishmentType.Minor,
-      yearsOffered: 2024
-    })
-      .exec();
+      const loginData = await getUsers(userId, studentId);
+      if (!loginData) {
+        return res.sendStatus(401);
+      }
+      const [user] = loginData;
 
-    const newPlan = new PlanModel({
-      studentId: user.userId,
-      accomplishments: bibleMinor ? [bibleMinor.accomplishmentId] : []
-    });
-    await newPlan.save();
-    user.activePlanId = newPlan.planId;
-    await user.save();
+      const bibleMinor = await AccomplishmentModel.findOne({
+        name: 'Bible',
+        type: AccomplishmentType.Minor,
+        yearsOffered: 2024
+      })
+        .exec();
+
+      const newPlan = new PlanModel({
+        studentId: user.userId,
+        accomplishments: bibleMinor ? [bibleMinor.accomplishmentId] : [],
+        catalogYear: catYear
+      });
+      await newPlan.save();
+      user.activePlanId = newPlan.planId;
+      await user.save();
   
-    res.sendStatus(204);
-  } catch (e) {
-    if (e instanceof jwtPkg.JsonWebTokenError) {
-      return res.sendStatus(401);
+      res.sendStatus(204);
+    } catch (e) {
+      if (e instanceof jwtPkg.JsonWebTokenError) {
+        return res.sendStatus(401);
+      }
+      console.error(e);
+      return res.sendStatus(500);
     }
-    console.error(e);
-    return res.sendStatus(500);
-  }
-});
+  });
 
 route.delete('/plan',
   header('authorization').isJWT(),

@@ -20,9 +20,13 @@
 }
 
 #course-table #col-group-name {
-  width: 24%;
+  width: 25%;
 }
 
-#course-table #col-group-id {
+#course-table #col-group-desc {
+  width: auto;
+}
+
+#course-table #col-group-credits {
   width: 5%; 
 }

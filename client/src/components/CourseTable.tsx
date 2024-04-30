@@ -8,25 +8,28 @@ import { useMemo, useState } from 'react';
 import { DataResponse } from '../../../server/typings/planner';
 import '../css/CourseTable.css';
 
-export default function CourseTable({ courses }: {
+export default function CourseTable({ courses, filter }: {
   courses: Required<DataResponse>['catalog']['courses'];
+  filter: string;
 }) {
   const [sortMode, setSortMode] = useState(SortMode.CourseId);
 
   const courseTableData = useMemo(() => {
-    const courseArr = Object.values(courses);
+    let courseArr = Object.values(courses);
     let comparer: (a: typeof courseArr[0], b: typeof courseArr[1]) => number;
     switch (sortMode) {
     case SortMode.CourseId:
       comparer = (a, b) => a.courseId.localeCompare(b.courseId);
       break;
     case SortMode.CourseName:
-      comparer = (a, b) => a.courseId.localeCompare(b.courseId);
+      comparer = (a, b) => a.name.localeCompare(b.name);
       break;
     case SortMode.Credits:
-      comparer = (a, b) => b.credits - a.credits;
+      comparer = (a, b) => a.credits - b.credits;
       break;
     }
+
+    courseArr = courseArr.filter(c => c.courseId.toLowerCase().includes(filter) || c.name.toLowerCase().includes(filter) || c.description.toLowerCase().includes(filter));
     courseArr.sort(comparer);
 
     const courseElems = [];
@@ -41,7 +44,7 @@ export default function CourseTable({ courses }: {
       );
     }
     return courseElems;
-  }, [sortMode]);
+  }, [sortMode, filter]);
 
   return (
     <table id='course-table'>

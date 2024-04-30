@@ -29,14 +29,17 @@ async function data(): Promise<DataResponse> {
 /**
  * Create a new plan and sets it to active.
  * 
+ * @param catYear The year of the plan.
  * @throws {AxiosError} If an error is recieved from the server, or if the user is not logged in.
  */
-async function createPlan(): Promise<void> {
+async function createPlan(catYear: number): Promise<void> {
   if (!await userApi.isLoggedIn(false)) {
     throw new Error('User not logged in');
   }
 
-  await axios.post(buildReqUrlWithStudent('/planner/plan'), {}, {
+  await axios.post(buildReqUrlWithStudent('/planner/plan'), {
+    catYear
+  }, {
     headers: {
       'Authorization': Cookies.get(USER_TOKEN_NAME)
     }

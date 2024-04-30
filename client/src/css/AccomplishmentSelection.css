@@ -1,0 +1,27 @@
+.selected-accomplishment {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 3px 10px;
+    height: 20px;
+}
+
+.acc-remove-button {
+  display: inline-block;
+  right: 0;
+  cursor: pointer;
+  text-align: right;
+}
+
+.acc-remove-button:hover {
+  text-decoration: underline;
+  background-color: lightgrey;
+}
+
+.acc-sel-section {
+  border: 1px solid black;
+  border-radius: 3px;
+
+  min-height: 80px;
+}
