@@ -6,7 +6,7 @@
 
 header {
   flex-shrink: 1;
-  min-height: 45px;
+  min-height: 55px;
   display: flex;
   flex-direction: row;
   align-content: flex-end;
@@ -53,6 +53,7 @@ main>div {
   border: 1px solid black;
 }
 
+#upper-left,
 #upper-right,
 #lower-right {
   overflow-y: scroll;
@@ -71,11 +72,13 @@ main>div {
   align-content: center;
   padding: 3px 10px;
   background-color: white;
+  gap: 10px;
 }
 
 dialog#main-dialog {
   width: 80vw;
-  height: 80vh;
+  min-height: 40vh;
+  max-height: 90vh;
 }
 
 .spacer {
@@ -99,4 +102,18 @@ dialog#main-dialog {
 
 #logout-button:hover {
   color: red;
+}
+
+#loading-header {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#course-search-container {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  width: 250px;
 }

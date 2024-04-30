@@ -2,10 +2,11 @@ import { DataResponse } from '../../../server/typings/planner';
 import { AccomplishmentId, PlanId } from '../../../server/typings/id';
 import '../css/AccomplishmentSelection.css';
 
-export default function AccomplishmentSelection({ selectedAccomplishments, allAccomplishments, onChange }: {
+export default function AccomplishmentSelection({ selectedAccomplishments, allAccomplishments, onChange, accomplishmentAddText }: {
   selectedAccomplishments: Required<DataResponse>['plans'][PlanId]['majors'];
   allAccomplishments: Required<DataResponse>['catalog']['accomplishments']['majors'];
   onChange: (newSelection: Required<DataResponse>['plans'][PlanId]['majors']) => void;
+  accomplishmentAddText: string;
 }) {
   const selectionElems = Object.keys(selectedAccomplishments).map(acc => {
     const accomplishmentData = allAccomplishments[acc as AccomplishmentId];
@@ -22,6 +23,7 @@ export default function AccomplishmentSelection({ selectedAccomplishments, allAc
 
   const availableAccomplishmments = Object.values(allAccomplishments).filter(acc => !Object.keys(selectedAccomplishments).includes(acc.accomplishmentId));
   const availableAccomplishmentElem = availableAccomplishmments.map(acc => <option value={acc.accomplishmentId} key={acc.accomplishmentId}>{acc.name}</option>);
+  availableAccomplishmentElem.unshift(<option key='select-key' hidden selected>{accomplishmentAddText}</option>);
   return (
     <>
       <div className='acc-sel-section'>{selectionElems}</div>

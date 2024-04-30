@@ -66,10 +66,10 @@ export default function PlanManager({ availableCatalogs, currentPlan, plans, acc
           <h3>Add new majors or minors</h3>
           <div id='acc-add-section'>
             <div className='acc-half'>
-              <AccomplishmentSelection selectedAccomplishments={currentMajors} allAccomplishments={accomplishments!.majors} onChange={acc => setCurrentMajors(acc)} />
+              <AccomplishmentSelection accomplishmentAddText='Add a major' selectedAccomplishments={currentMajors} allAccomplishments={accomplishments!.majors} onChange={acc => setCurrentMajors(acc)} />
             </div>
             <div className='acc-half'>
-              <AccomplishmentSelection selectedAccomplishments={currentMinors} allAccomplishments={accomplishments!.minors} onChange={acc => setCurrentMinors(acc)} />
+              <AccomplishmentSelection accomplishmentAddText='Add a minor' selectedAccomplishments={currentMinors} allAccomplishments={accomplishments!.minors} onChange={acc => setCurrentMinors(acc)} />
             </div>
           </div>
           <label htmlFor='plan-name-change'>Change name: </label>

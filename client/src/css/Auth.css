@@ -1,0 +1,43 @@
+#auth-wrapper {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  align-items: center !important;
+}
+
+#auth-container {
+  display: block;
+  min-width: 350px;
+  max-width: 40vw;
+  height: 40vh;
+  border: 1px solid black;
+  padding: 8px;
+}
+
+#auth-container h1 {
+  width: 100%;
+  text-align: center;
+}
+
+#auth-container>a,
+#auth-container>a:hover,
+#auth-container>a:visited {
+  cursor: pointer;
+  color: black;
+  text-decoration: none;
+  text-align: center;
+}
+
+#auth-container>a:hover {
+  text-decoration: underline;
+}
+
+#auth-container button,
+#auth-container>a,
+#auth-container input {
+  width: 80%;
+  display: block;
+  margin: 8px auto;
+}

@@ -26,6 +26,7 @@ import PlanManager from '../components/PlanManager';
 import $ from 'jquery';
 import { TermSeason } from '../enum';
 import { CourseId } from '../../../server/typings/id';
+import Notes from '../components/Notes';
 
 export default class Planner extends Component<Record<string, never>, PlannerState> {
   
@@ -90,7 +91,27 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
       dialogContent = <p>Faculty notes</p>;
       break;
     case DialogMode.StudentNotes:
-      dialogContent = <p>Student notes</p>;
+      dialogContent = <Notes title='Student Notes' value={this.state.data!.plan!.studentNotes} onChange={notes => {
+        const dataCp = JSON.parse(JSON.stringify(this.state.data)) as Required<typeof this.state>['data'];
+        const oldData = JSON.parse(JSON.stringify(this.state.data)) as Required<typeof this.state>['data'];
+
+        dataCp.plan!.studentNotes = notes;
+        plannerApi
+          .updateStudentNotes(this.state.data!.plan!.planId, notes)
+          .then(result => {
+            if (!result) {
+              this.setState({
+                data: oldData
+              });
+            }
+          });
+
+        this.setState({
+          data: dataCp,
+          dialogMode: DialogMode.Hidden
+        });
+      }}
+      />;
       break;
     case DialogMode.PlanManager:
       dialogContent = <PlanManager plans={this.state.data?.plans ?? {}} currentPlan={this.state.data?.plan} availableCatalogs={this.state.data?.availableCatalogs ?? []} accomplishments={this.state.data?.catalog?.accomplishments} />;
@@ -123,10 +144,10 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
     for (let i = 0; i < yearCount; ++i) {
       const year = catalogYear + i;
       years.push(<Year allCourses={this.state.data!.catalog!.courses} courses={courses} year={year} key={'year-' + year} onCourseAdded={(year, termSeason, courseId) => {
-        const dataCopy = { ...this.state.data! };
-        const oldData = { ...this.state.data! };
+        const dataCp = JSON.parse(JSON.stringify(this.state.data)) as Required<typeof this.state>['data'];
+        const oldData = JSON.parse(JSON.stringify(this.state.data)) as Required<typeof this.state>['data'];
 
-        dataCopy.plan!.courses[courseId] = {
+        dataCp.plan!.courses[courseId] = {
           plannedCourse: courseId,
           plannedTerm: termSeason,
           plannedYear: year
@@ -145,14 +166,14 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
           });
 
         this.setState({
-          data: dataCopy
+          data: dataCp
         });
       }}
       onCourseRemoved={(courseId) => {
-        const dataCopy = { ...this.state.data! };
-        const oldData = { ...this.state.data! };
+        const dataCp = JSON.parse(JSON.stringify(this.state.data)) as Required<typeof this.state>['data'];
+        const oldData = JSON.parse(JSON.stringify(this.state.data)) as Required<typeof this.state>['data'];
   
-        delete dataCopy.plan!.courses[courseId];
+        delete dataCp.plan!.courses[courseId];
         $(`.requirement-${courseId}`).removeClass('course-fullfilled');
         plannerApi.deletePlannedCourse(this.state.data!.plan!.planId, courseId)
           .then(result => {
@@ -165,7 +186,7 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
           });
   
         this.setState({
-          data: dataCopy
+          data: dataCp
         });
       }}
       />);
@@ -177,17 +198,18 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
   private _updateYearCount(delta: number) {
     const { yearCount: originalYearCount } = this.state.data!.plan!;
     const newYearCount = originalYearCount + delta;
+
     plannerApi.updateYearCount(this.state.data!.plan!.planId, newYearCount)
       .then(didUpdate => {
         if (!didUpdate) {
-          const newData = { ...this.state.data } as DataResponse;
-          newData.plan!.yearCount = originalYearCount;
+          const revertData = JSON.parse(JSON.stringify(this.state.data)) as DataResponse;
+          revertData.plan!.yearCount = originalYearCount;
           this.setState({
-            data: newData
+            data: revertData
           });
         }
       });
-    const newData = { ...this.state.data } as DataResponse;
+    const newData = JSON.parse(JSON.stringify(this.state.data)) as DataResponse;
     newData.plan!.yearCount = newYearCount;
     this.setState({
       data: newData
@@ -203,7 +225,7 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
     }
     
     if (!this.state.loaded) {
-      return <h1>Loading</h1>;
+      return <h1 id='loading-header'>Loading</h1>;
     }
 
     let totalCredits = null;
@@ -239,12 +261,16 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
               this.state.data?.plan && <>
                 {this._genYears()}
                 <div id='ur-utils'>
-                  <button>Student Notes</button>
+                  <button onClick={() => this.setState({
+                    dialogMode: DialogMode.StudentNotes
+                  })}
+                  >Student Notes</button>
                   {this.state.isFaculty && <button>Advisor Notes</button>}
                   <div className='spacer' />
-                  <button disabled={this.state.data!.plan!.yearCount >= 8} onClick={() => this._updateYearCount(1)}>+ Add Year</button>
+                  <button id='add-year-button' disabled={this.state.data!.plan!.yearCount >= 8} onClick={() => this._updateYearCount(1)}>+ Add Year</button>
                   <button disabled={this.state.data!.plan!.yearCount <= 4} onClick={() => {
-                    const dataCopy = { ...this.state.data! };
+                    const dataCopy = JSON.parse(JSON.stringify(this.state.data!)) as DataResponse;
+                    
                     for (const [courseId, course] of Object.entries(this.state.data!.plan!.courses)) {
                       if ((course.plannedYear >= this.state.data!.plan!.catalogYear + this.state.data!.plan!.yearCount - 1 &&
                           course.plannedTerm === TermSeason.Fall) ||
@@ -254,12 +280,10 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
                         $(`.requirement-${courseId}`).removeClass('course-fullfilled');
                       }
                     }
+
                     this.setState({
                       data: dataCopy
-                    });
-
-                    this._updateYearCount(-1);
-
+                    }, () => this._updateYearCount(-1));
                   }}
                   >- Remove Year</button>
                 </div>
@@ -287,11 +311,13 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
           <div id='lower-right'>
             {this.state.data!.plan && <>
               <h2>Course Finder</h2>
-              <label htmlFor='course-search'>Search: </label>
-              <input name='course-search' type='text' placeholder='Search...' value={this.state.courseSearch} onChange={e => this.setState({
-                courseSearch: e.target.value
-              })}
-              />
+              <div id='course-search-container'>
+                <label htmlFor='course-search'>Search: </label>
+                <input id='course-search' name='course-search' type='text' placeholder='Search...' value={this.state.courseSearch} onChange={e => this.setState({
+                  courseSearch: e.target.value
+                })}
+                />
+              </div>
               <CourseTable courses={this.state.data!.catalog!.courses} filter={this.state.courseSearch.toLowerCase()} key='course-table' />
             </>}
           </div>

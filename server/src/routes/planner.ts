@@ -648,6 +648,7 @@ route.delete('/plannedCourse',
 route.patch('/studentNotes',
   header('authorization').isJWT(),
   query('studentId')
+    .optional()
     .isLength({
       min: 32,
       max: 32
@@ -709,7 +710,6 @@ route.patch('/studentNotes',
 route.patch('/advisorNotes',
   header('authorization').isJWT(),
   query('studentId')
-    .optional()
     .isLength({
       min: 32,
       max: 32

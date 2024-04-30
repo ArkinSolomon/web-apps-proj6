@@ -4,7 +4,10 @@
     flex-direction: row;
     justify-content: space-between;
     padding: 3px 10px;
-    height: 20px;
+}
+
+.selected-accomplishment p {
+  margin: 4px 0;
 }
 
 .acc-remove-button {
@@ -24,4 +27,9 @@
   border-radius: 3px;
 
   min-height: 80px;
+}
+
+.acc-half select {
+  display: block;
+  margin: 4px auto;
 }

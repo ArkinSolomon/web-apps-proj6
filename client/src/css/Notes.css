@@ -1,0 +1,10 @@
+.notes textarea {
+  width: 95%;
+  margin: 10px auto;
+  min-height: 100px;
+  display: block;
+}
+
+.notes button {
+  float: right;
+}
