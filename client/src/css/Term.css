@@ -9,6 +9,7 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  height: min-content;
 }
 
 .planned-course-row:has(.planned-course-remove:hover) {
@@ -17,4 +18,20 @@
 
 .planned-course, .planned-course-remove {
   cursor: pointer;
+  margin: 1px;
+}
+
+.term-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.term-header>p {
+  margin: 3px;
+}
+
+.term-title,
+.credit-count {
+  font-weight: bold;
 }

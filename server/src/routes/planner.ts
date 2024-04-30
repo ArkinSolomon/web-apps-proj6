@@ -219,14 +219,17 @@ route.get('/data', header('authorization').isJWT(), query('studentId').optional(
         const coreReqs = requirements
           .filter(r => r.requirementType === RequirementType.Core)
           .map(reqMapper)
+          .sort((a, b) => a.localeCompare(b))
           .filter(uniqueFilter());
         const electiveReqs = requirements
           .filter(r => r.requirementType === RequirementType.Elective)
           .map(reqMapper)
+          .sort((a, b) => a.localeCompare(b))
           .filter(uniqueFilter());
         const cognateReqs = requirements
           .filter(r => r.requirementType === RequirementType.Cognate)
           .map(reqMapper)
+          .sort((a, b) => a.localeCompare(b))
           .filter(uniqueFilter());
         
         data.requirements = {
@@ -553,7 +556,10 @@ route.post('/plannedCourse',
         return res.sendStatus(400);
       }
 
-      plan.courses.splice(plan.courses.findIndex(pc => pc.plannedCourse === courseId), 1);
+      const existingCourseIndex = plan.courses.findIndex(pc => pc.plannedCourse === courseId);
+      if (existingCourseIndex >= 0) {
+        plan.courses.splice(existingCourseIndex, 1);
+      }
       plan.courses.push({
         plannedCourse: courseId,
         plannedTerm: termSeason,
@@ -943,7 +949,11 @@ route.patch('/yearCount',
           courses: {
             $or: [{
               $and: [
-                { plannedYear: catalogYear + years },
+                {
+                  plannedYear: {
+                    $gte: catalogYear + years
+                  }
+                },
                 { plannedTerm: 'fall' }
               ]
             }, {

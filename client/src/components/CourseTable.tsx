@@ -35,7 +35,7 @@ export default function CourseTable({ courses, filter }: {
     const courseElems = [];
     for (const course of courseArr) {
       courseElems.push(
-        <tr key={`course-table-${course.courseId}`}>
+        <tr className='course-table-class-row' draggable onDragStart={e => e.dataTransfer.setData('courseId', course.courseId)} key={`course-table-${course.courseId}`}>
           <td>{course.courseId}</td>
           <td>{course.name}</td>
           <td>{course.description}</td>

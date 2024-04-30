@@ -21,7 +21,9 @@ route.post('/register',
     try {
       const result = validationResult(req);
       if (!result.isEmpty()) {
-        return res.json(result.array());
+        return res
+          .status(400)
+          .json(result.array());
       }
 
       const { email, password, name } = matchedData(req) as {
@@ -82,7 +84,9 @@ route.post('/login',
     try {
       const result = validationResult(req);
       if (!result.isEmpty()) {
-        return res.json(result.array());
+        return res
+          .status(400)
+          .json(result.array());
       }
 
       const { email, password } = matchedData(req) as {

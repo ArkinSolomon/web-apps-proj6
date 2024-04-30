@@ -24,6 +24,8 @@ import CourseTable from '../components/CourseTable';
 import Requirements from '../components/Requirements';
 import PlanManager from '../components/PlanManager';
 import $ from 'jquery';
+import { TermSeason } from '../enum';
+import { CourseId } from '../../../server/typings/id';
 
 export default class Planner extends Component<Record<string, never>, PlannerState> {
   
@@ -110,7 +112,7 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
     if (this.state.data!.plan!.majors.length === 1) {
       return this.state.data!.plan!.majors[0];
     } else {
-      return `${this.state.data!.plan!.majors[0]} and ${this.state.data!.plan!.majors.length - 1}`;
+      return `${this.state.data!.plan!.majors[0]} and ${this.state.data!.plan!.majors.length - 1} more`;
     }
   }
 
@@ -204,6 +206,14 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
       return <h1>Loading</h1>;
     }
 
+    let totalCredits = null;
+    if (this.state.data?.plan) {
+      totalCredits = Object.values(this.state.data!.plan!.courses).reduce((total, { plannedCourse }) => {
+        const courseData = this.state.data!.catalog!.courses[plannedCourse];
+        return total + courseData.credits;
+      }, 0);
+    }
+
     return (
       <>
         {this._dialogSelector()}
@@ -217,7 +227,7 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
             <p>Plan: <a onClick={() => this.setState({
               dialogMode: DialogMode.PlanManager
             })}
-            >{this.state.data?.plan?.planName ?? 'N/A'}</a></p>
+            >{this.state.data?.plan?.planName ?? 'N/A'}</a> (<span>{totalCredits ?? 'N/A'}</span> Credits)</p>
           </div>
         </header>
         <main>
@@ -233,7 +243,25 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
                   {this.state.isFaculty && <button>Advisor Notes</button>}
                   <div className='spacer' />
                   <button disabled={this.state.data!.plan!.yearCount >= 8} onClick={() => this._updateYearCount(1)}>+ Add Year</button>
-                  <button disabled={this.state.data!.plan!.yearCount <= 4} onClick={() => this._updateYearCount(-1)}>- Remove Year</button>
+                  <button disabled={this.state.data!.plan!.yearCount <= 4} onClick={() => {
+                    const dataCopy = { ...this.state.data! };
+                    for (const [courseId, course] of Object.entries(this.state.data!.plan!.courses)) {
+                      if ((course.plannedYear >= this.state.data!.plan!.catalogYear + this.state.data!.plan!.yearCount - 1 &&
+                          course.plannedTerm === TermSeason.Fall) ||
+                        (course.plannedYear >= this.state.data!.plan!.catalogYear + this.state.data!.plan!.yearCount &&
+                          (course.plannedTerm == TermSeason.Spring || course.plannedTerm == TermSeason.Summer))) {
+                        delete dataCopy.plan!.courses[courseId as CourseId];
+                        $(`.requirement-${courseId}`).removeClass('course-fullfilled');
+                      }
+                    }
+                    this.setState({
+                      data: dataCopy
+                    });
+
+                    this._updateYearCount(-1);
+
+                  }}
+                  >- Remove Year</button>
                 </div>
               </>
             }
@@ -258,7 +286,9 @@ export default class Planner extends Component<Record<string, never>, PlannerSta
           </div>
           <div id='lower-right'>
             {this.state.data!.plan && <>
-              <input type='text' placeholder='Search...' value={this.state.courseSearch} onChange={e => this.setState({
+              <h2>Course Finder</h2>
+              <label htmlFor='course-search'>Search: </label>
+              <input name='course-search' type='text' placeholder='Search...' value={this.state.courseSearch} onChange={e => this.setState({
                 courseSearch: e.target.value
               })}
               />

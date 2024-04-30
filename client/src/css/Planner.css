@@ -82,6 +82,16 @@ dialog#main-dialog {
   flex-grow: 1;
 }
 
+#lower-right h2 {
+  width: 100%;
+  text-align: center;
+  margin: 2px;
+}
+
+#lower-left, #lower-right {
+  padding: 8px;
+}
+
 #lower-left a {
   cursor: pointer;
   text-decoration: underline;

@@ -12,8 +12,10 @@ export default function Term({ year, termSeason, allCourses, courses, onCourseAd
   onCourseRemoved: (id: CourseId) => void;
 }) {
   const termCourses = Object.values(courses).filter(c => c.plannedYear === year && c.plannedTerm === termSeason);
+  let totalCredits = 0;
   const plannedList = termCourses.map(tc => {
     const course = allCourses[tc.plannedCourse];
+    totalCredits += course.credits;
     return (
       <div className='planned-course-row' key={`${year}-${termSeason}-${course.courseId}`}>
         <p draggable onDragStart={e => e.dataTransfer.setData('courseId', course.courseId)} className='planned-course'>{course.courseId} {course.name}</p>
@@ -29,7 +31,11 @@ export default function Term({ year, termSeason, allCourses, courses, onCourseAd
       onCourseAdded(year, termSeason, courseId as CourseId);
     }}
     >
-      {termSeason[0].toUpperCase() + termSeason.slice(1)} {year}
+      <div className='term-header'>
+        <p className='term-title'>{termSeason[0].toUpperCase() + termSeason.slice(1)} {year}</p>
+        <p>Credits: <span className='credit-count'>{totalCredits}</span></p>
+      </div>
+      <hr />
       {plannedList}
     </div>
   );
